@@ -204,7 +204,7 @@ export default function NotificationsModule({
         </Empty>
       ) : unavailable ? (
         <Empty>
-          Windows hasn't given Jhalak access to your notifications. Turn on Privacy &amp; security →
+          Windows hasn't given Holm access to your notifications. Turn on Privacy &amp; security →
           Notifications.
         </Empty>
       ) : notifications.length === 0 ? (

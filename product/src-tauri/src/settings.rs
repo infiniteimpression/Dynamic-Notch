@@ -1259,7 +1259,7 @@ pub fn set_mute_windows_banners(
     if enabled {
         if !notifications::banner_muting_supported() {
             return Err(
-                "The Microsoft Store version of Jhalak can't change this — Windows keeps a \
+                "The Microsoft Store version of Holm can't change this — Windows keeps a \
                  packaged app's copy of the setting to itself. Windows' own banners will keep \
                  appearing alongside the notch."
                     .into(),
@@ -1270,7 +1270,7 @@ pub fn set_mute_windows_banners(
         }
         if !notifications::access_allowed() {
             return Err(
-                "Windows hasn't given Jhalak access to notifications, so the notch has nothing to \
+                "Windows hasn't given Holm access to notifications, so the notch has nothing to \
                  show. Turn on Privacy & security → Notifications and try again."
                     .into(),
             );

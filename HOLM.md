@@ -1,6 +1,6 @@
-# Jhalak
+# Holm
 
-Jhalak is a fork of [Crest](https://github.com/LennyDany-03/Dynamic-Notch) by
+Holm is a fork of [Crest](https://github.com/LennyDany-03/Dynamic-Notch) by
 Lenny Dany, used under the MIT licence, with features modelled on Nusa and a few
 of its own. Everything Crest already did is kept.
 
@@ -22,11 +22,11 @@ switched on and off in **Settings → Panels** like Crest's own.
 
 ## Differences from Crest that matter
 
-- **Own identity.** App ID `com.infiniteimpression.jhalak`, its own data folder,
-  startup task and single-instance lock, so Jhalak and Crest can be installed
+- **Own identity.** App ID `com.infiniteimpression.holm`, its own data folder,
+  startup task and single-instance lock, so Holm and Crest can be installed
   side by side without touching each other's settings.
 - **No auto-update.** Crest's updater follows upstream's release feed and would
-  replace Jhalak with stock Crest, so it is switched off and the tray's "Check
+  replace Holm with stock Crest, so it is switched off and the tray's "Check
   for updates" row is hidden. New versions are installed from this repository's
   Releases page.
 - **No keyboard hook.** The pop-ups read state Windows already exposes
@@ -40,7 +40,7 @@ switched on and off in **Settings → Panels** like Crest's own.
 
 ## Building
 
-Push to `main` (or run **Actions → Build Jhalak → Run workflow**). GitHub builds
+Push to `main` (or run **Actions → Build Holm → Run workflow**). GitHub builds
 the installer on Windows and attaches it to a new release. No secrets needed.
 
 Locally, from `product/`: `npm ci`, then `npx tauri build --bundles nsis`

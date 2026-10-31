@@ -59,7 +59,7 @@ export default function AccentPicker({
   return (
     <RowShell
       title="Accent colour"
-      body="The colour every active thing in Jhalak is drawn in — the scrub bar, the switches, a connected device, the day you have selected. Applies to the notch, the tray menu and this window at once."
+      body="The colour every active thing in Holm is drawn in — the scrub bar, the switches, a connected device, the day you have selected. Applies to the notch, the tray menu and this window at once."
       icon={
         <svg viewBox="0 0 24 24" width={18} height={18} fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 3a9 9 0 0 0 0 18c1.4 0 2.2-.9 2.2-2 0-1-.7-1.6-.7-2.4 0-.7.6-1.3 1.4-1.3H17a4.5 4.5 0 0 0 4.5-4.6C21.5 6.3 17.3 3 12 3z" />

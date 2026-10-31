@@ -335,7 +335,7 @@ const GROUPS: Row[][] = [
   [
     {
       id: 'quit',
-      label: 'Quit Jhalak',
+      label: 'Quit Holm',
       danger: true,
       action: { kind: 'quit' },
       icon: (
@@ -593,7 +593,7 @@ export default function TrayMenu() {
             >
               C
             </div>
-            <span style={{ fontSize: 13, fontWeight: 600, color: color.text.primary }}>Jhalak</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: color.text.primary }}>Holm</span>
             <span style={{ ...sectionLabel, marginLeft: 'auto' }}>{version}</span>
           </header>
 

@@ -15,7 +15,7 @@ use std::sync::Mutex;
 use std::time::Duration;
 
 const TIMEOUT: Duration = Duration::from_secs(10);
-const USER_AGENT: &str = concat!("Jhalak/", env!("CARGO_PKG_VERSION"), " (prayer times)");
+const USER_AGENT: &str = concat!("Holm/", env!("CARGO_PKG_VERSION"), " (prayer times)");
 
 #[derive(Serialize, Clone)]
 #[serde(rename_all = "camelCase")]

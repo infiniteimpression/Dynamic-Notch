@@ -45,7 +45,7 @@ use tauri_plugin_autostart::ManagerExt;
 
 /// The task's name in the scheduler. Bare rather than in a folder — a folder
 /// would need creating first, and one task does not need a namespace.
-const TASK_NAME: &str = "Jhalak";
+const TASK_NAME: &str = "Holm";
 
 /// The `TaskId` of the `windows.startupTask` extension in the MSIX manifest.
 ///
@@ -211,7 +211,7 @@ fn task_xml(exe: &Path) -> String {
         r#"<?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.4" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
   <RegistrationInfo>
-    <Description>Starts Jhalak when you sign in.</Description>
+    <Description>Starts Holm when you sign in.</Description>
     <URI>\{TASK_NAME}</URI>
   </RegistrationInfo>
   <Triggers>

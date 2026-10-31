@@ -35,7 +35,7 @@ fn acquire_instance_lock() -> bool {
     use windows::Win32::System::Threading::CreateMutexW;
 
     unsafe {
-        let handle = match CreateMutexW(None, true, w!("Local\\com.infiniteimpression.jhalak")) {
+        let handle = match CreateMutexW(None, true, w!("Local\\com.infiniteimpression.holm")) {
             Ok(handle) => handle,
             Err(_) => return true,
         };
@@ -218,7 +218,7 @@ pub fn run() {
             // `tray.rs` stands in for it. See that module for why.
             TrayIconBuilder::new()
                 .icon(icon)
-                .tooltip("Jhalak")
+                .tooltip("Holm")
                 .on_tray_icon_event(|tray, event| {
                     let TrayIconEvent::Click {
                         button,

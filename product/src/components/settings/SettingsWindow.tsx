@@ -834,14 +834,14 @@ function AboutPane({ version }: { version: string }) {
   return (
     <>
       <Paragraph>
-        <strong style={{ color: color.text.strong, fontWeight: 600 }}>Jhalak</strong> is a dynamic
+        <strong style={{ color: color.text.strong, fontWeight: 600 }}>Holm</strong> is a dynamic
         notch for Windows 11. It rests against the top edge of your screen, hidden until you reach
         for it, and gets out of the way the moment your cursor leaves.
       </Paragraph>
       <Paragraph>
         The small things you break your flow for — skipping a track, opening an app, finding
         something you copied ten minutes ago — normally each cost you a window to summon and
-        dismiss. Jhalak gives them one surface that is always a flick of the mouse away and takes up
+        dismiss. Holm gives them one surface that is always a flick of the mouse away and takes up
         none of your screen while you work.
       </Paragraph>
       <Paragraph>
@@ -1095,7 +1095,7 @@ function AppearancePane({
 
       <LiveRange
         title="Corner radius"
-        body="How rounded every Jhalak surface is — the notch's cards, the tray menu and this window. All the way down is square corners."
+        body="How rounded every Holm surface is — the notch's cards, the tray menu and this window. All the way down is square corners."
         value={settings.cornerRadius}
         bounds={CORNER_RADIUS}
         format={(px) => `${px} px`}
@@ -1330,7 +1330,7 @@ function DisplayPane({ api }: { api: ReturnType<typeof useSettings> }) {
   const count = displays.length
   const summary =
     count === 0
-      ? 'Jhalak can’t see any screens at the moment.'
+      ? 'Holm can’t see any screens at the moment.'
       : count === 1
         ? 'One screen is connected, so the notch lives on it.'
         : `${count} screens are connected. Pick the one the notch comes down on, or put it on all of them.`
@@ -1579,7 +1579,7 @@ function SettingsPane({ api }: { api: ReturnType<typeof useSettings> }) {
 
       <SettingRow
         title="Mute Windows' own banners"
-        body="Stops Windows drawing its pop-up in the bottom-right corner, so a notification appears in the notch and nowhere else. It still lands in the notification centre, and Windows gets its banners back if you turn this off or quit Jhalak."
+        body="Stops Windows drawing its pop-up in the bottom-right corner, so a notification appears in the notch and nowhere else. It still lands in the notification centre, and Windows gets its banners back if you turn this off or quit Holm."
         on={settings.muteWindowsBanners}
         onToggle={() => setMuteWindowsBanners(!settings.muteWindowsBanners)}
         // The Store build cannot do this at all: a packaged app's registry writes
@@ -1606,7 +1606,7 @@ function SettingsPane({ api }: { api: ReturnType<typeof useSettings> }) {
           refuses to silence Windows on top of that. */}
       {notificationAccess === false && (
         <p style={{ margin: '2px 12px 0', fontSize: 11.5, lineHeight: 1.5, color: color.text.muted }}>
-          Windows hasn't given Jhalak access to your notifications. Turn on{' '}
+          Windows hasn't given Holm access to your notifications. Turn on{' '}
           <strong style={{ color: color.text.secondary, fontWeight: 500 }}>
             Settings → Privacy &amp; security → Notifications
           </strong>
@@ -1621,7 +1621,7 @@ function SettingsPane({ api }: { api: ReturnType<typeof useSettings> }) {
       {!bannerMutingSupported && notificationAccess !== false && (
         <p style={{ margin: '2px 12px 0', fontSize: 11.5, lineHeight: 1.5, color: color.text.muted }}>
           Muting isn't available in the Microsoft Store version — Windows keeps a packaged app's
-          copy of that setting to itself, so Jhalak can't reach the one the pop-up reads.
+          copy of that setting to itself, so Holm can't reach the one the pop-up reads.
           Notifications still appear in the notch; Windows' own banner appears too.
         </p>
       )}
@@ -1653,7 +1653,7 @@ function SettingsPane({ api }: { api: ReturnType<typeof useSettings> }) {
 
       <SettingRow
         title="Keep recent screenshots"
-        body="Watches the folders Windows saves screenshots to, shows the last few on a card, and drops a thumbnail down the moment you take one — so you can drag it straight into whatever it was for. Jhalak only reads them: nothing is copied, moved or deleted."
+        body="Watches the folders Windows saves screenshots to, shows the last few on a card, and drops a thumbnail down the moment you take one — so you can drag it straight into whatever it was for. Holm only reads them: nothing is copied, moved or deleted."
         on={settings.screenshots}
         onToggle={() => setScreenshots(!settings.screenshots)}
         icon={
@@ -1673,7 +1673,7 @@ function SettingsPane({ api }: { api: ReturnType<typeof useSettings> }) {
 
       <SettingRow
         title="Play a chime when a timer finishes"
-        body="A short two-note tone the moment a countdown lands — the only sound Jhalak makes. The notch still drops its banner and flashes the card either way, so turning this off leaves you told, just not out loud."
+        body="A short two-note tone the moment a countdown lands — the only sound Holm makes. The notch still drops its banner and flashes the card either way, so turning this off leaves you told, just not out loud."
         on={settings.timerSound}
         onToggle={() => setTimerSound(!settings.timerSound)}
         icon={
@@ -2000,7 +2000,7 @@ export default function SettingsWindow() {
                 data-tauri-drag-region
                 style={{ fontSize: 13, fontWeight: 600, color: color.text.primary }}
               >
-                Jhalak
+                Holm
               </span>
             </div>
 

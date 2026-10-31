@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Jhalak",
+  "productName": "Holm",
   "version": "1.0.0",
-  "identifier": "com.infiniteimpression.jhalak",
+  "identifier": "com.infiniteimpression.holm",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -46,7 +46,7 @@
       },
       {
         "label": "settings",
-        "title": "Jhalak Settings",
+        "title": "Holm Settings",
         "width": 720,
         "height": 560,
         "decorations": false,

@@ -105,7 +105,7 @@ export default function WeatherModule({ feed }: { feed: WeatherFeed }) {
               : // No place set. Said as the reason rather than as an error,
                 // because nothing has gone wrong — Crest has deliberately not
                 // guessed where the user is. See `weather.rs`.
-                'Jhalak doesn’t know where you are yet. Pick a place in Settings → Weather and the forecast lands here.'}
+                'Holm doesn’t know where you are yet. Pick a place in Settings → Weather and the forecast lands here.'}
         </Empty>
       ) : (
         <>
