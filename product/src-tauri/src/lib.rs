@@ -18,6 +18,9 @@ mod timer;
 mod tray;
 mod updater;
 mod weather;
+mod hud;
+mod prayer;
+mod store;
 
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri_plugin_autostart::MacosLauncher;
@@ -32,7 +35,7 @@ fn acquire_instance_lock() -> bool {
     use windows::Win32::System::Threading::CreateMutexW;
 
     unsafe {
-        let handle = match CreateMutexW(None, true, w!("Local\\com.lenny.crest.dynamic-notch")) {
+        let handle = match CreateMutexW(None, true, w!("Local\\com.infiniteimpression.jhalak")) {
             Ok(handle) => handle,
             Err(_) => return true,
         };
@@ -145,6 +148,10 @@ pub fn run() {
             updater::updater_install,
             updater::updater_auto_allowed,
             updater::updater_store_managed,
+            settings::set_extras,
+            store::read_store,
+            store::write_store,
+            prayer::get_prayer_times,
         ])
         .on_window_event(|window, event| {
             // A popup menu must close when it loses focus, the same as the native
@@ -200,6 +207,7 @@ pub fn run() {
             // It is what returns the notch to the primary when the screen it was
             // sent to goes away. See `display.rs`.
             display::start_watcher(app.handle());
+            hud::start(app.handle());
 
             let icon = app
                 .default_window_icon()
@@ -210,7 +218,7 @@ pub fn run() {
             // `tray.rs` stands in for it. See that module for why.
             TrayIconBuilder::new()
                 .icon(icon)
-                .tooltip("Crest")
+                .tooltip("Jhalak")
                 .on_tray_icon_event(|tray, event| {
                     let TrayIconEvent::Click {
                         button,

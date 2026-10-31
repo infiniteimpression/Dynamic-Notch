@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 import type { PanelPref } from '../types/notch'
+import { EXTRAS_DEFAULTS, type Extras } from '../types/extras'
 import type { Place, WeatherPlace } from '../types/weather'
 
 /**
@@ -121,6 +122,8 @@ export interface Settings {
    * acquiring a new kind of presence without asking.
    */
   timerSound: boolean
+  /** This fork's own preferences. See `types/extras.ts`. */
+  extras: Extras
 }
 
 /**
@@ -161,6 +164,7 @@ const DEFAULTS: Settings = {
   hotkey: null,
   screenshots: true,
   timerSound: true,
+  extras: EXTRAS_DEFAULTS,
 }
 
 /**
@@ -248,6 +252,11 @@ export const COLLAPSE_DELAY = { min: 100, max: 2000, step: 50 } as const
  * against the state Rust reports actually reaching, so a failed write snaps the
  * switch back instead of leaving it lying.
  */
+/** Shallow defaults, plus the nested extras block, which a shallow spread would replace whole. */
+function withDefaults(stored: Partial<Settings>): Settings {
+  return { ...DEFAULTS, ...stored, extras: { ...EXTRAS_DEFAULTS, ...(stored.extras ?? {}) } }
+}
+
 export function useSettings() {
   const [settings, setSettings] = useState<Settings>(DEFAULTS)
   const [error, setError] = useState<string | null>(null)
@@ -264,7 +273,7 @@ export function useSettings() {
 
   const read = useCallback(() => {
     void invoke<Settings>('read_settings')
-      .then((stored) => setSettings({ ...DEFAULTS, ...stored }))
+      .then((stored) => setSettings(withDefaults(stored)))
       .catch(() => setSettings(DEFAULTS))
       .finally(() => setLoaded(true))
   }, [])
@@ -288,7 +297,7 @@ export function useSettings() {
   // has to obey lives in another window entirely.
   useEffect(() => {
     const pending = listen<Settings>('settings-changed', (event) => {
-      setSettings({ ...DEFAULTS, ...event.payload })
+      setSettings(withDefaults(event.payload))
     })
     return () => {
       void pending.then((unlisten) => unlisten())
@@ -492,9 +501,33 @@ export function useSettings() {
     [write],
   )
 
+  /**
+   * Change some of the extras. The whole block is sent, built on the latest
+   * state rather than on this render's, so two quick toggles cannot drop each
+   * other's change.
+   */
+  const extrasRef = useRef(settings.extras)
+  extrasRef.current = settings.extras
+  const setExtras = useCallback(
+    (patch: Partial<Extras>) => {
+      const extras = { ...extrasRef.current, ...patch }
+      extrasRef.current = extras
+      setSettings((prev) => ({ ...prev, extras }))
+      setError(null)
+      void invoke<Extras>('set_extras', { extras })
+        .then((reached) => setSettings((latest) => ({ ...latest, extras: reached })))
+        .catch((reason) => {
+          setError(typeof reason === 'string' && reason ? reason : "Couldn't save that setting.")
+          read()
+        })
+    },
+    [read],
+  )
+
   return {
     settings,
     loaded,
+    setExtras,
     error,
     setAlwaysOnTop,
     setNotifications,

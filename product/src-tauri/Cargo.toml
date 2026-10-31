@@ -63,6 +63,8 @@ windows = { version = "0.58", features = [
   "Win32_Devices_FunctionDiscovery",
   # Windows Core Audio endpoints behind Quick Access.
   "Win32_Media_Audio",
+  # Master volume for the volume pop-up. See `hud.rs`.
+  "Win32_Media_Audio_Endpoints",
   "Win32_System_Power",
   # CPU / GPU / disk / thermal counters and the power row, for `perf.rs`.
   "Win32_System_Performance",

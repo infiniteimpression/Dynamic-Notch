@@ -247,7 +247,7 @@ pub async fn get_weather(place: WeatherPlace, refresh: bool) -> Result<Weather, 
     let api: ApiResponse = response
         .json()
         .await
-        .map_err(|_| "The forecast came back in a shape Crest didn't recognise.".to_string())?;
+        .map_err(|_| "The forecast came back in a shape Jhalak didn't recognise.".to_string())?;
 
     let current = CurrentWeather {
         temperature: required(api.current.temperature_2m, "a temperature")?,
@@ -334,7 +334,7 @@ pub async fn search_places(query: String) -> Result<Vec<Place>, String> {
     let body: GeocodeResponse = response
         .json()
         .await
-        .map_err(|_| "The place search came back in a shape Crest didn't recognise.".to_string())?;
+        .map_err(|_| "The place search came back in a shape Jhalak didn't recognise.".to_string())?;
 
     Ok(body
         .results

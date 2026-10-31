@@ -136,7 +136,7 @@ export default function UpdateAnnounce({
             color: color.text.muted,
           }}
         >
-          {phase === 'installing' ? 'Installing' : 'Updating Crest'}
+          {phase === 'installing' ? 'Installing' : 'Updating Jhalak'}
         </div>
 
         <div

@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Crest",
-  "version": "0.7.2",
-  "identifier": "com.lenny.crest",
+  "productName": "Jhalak",
+  "version": "1.0.0",
+  "identifier": "com.infiniteimpression.jhalak",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -46,7 +46,7 @@
       },
       {
         "label": "settings",
-        "title": "Crest Settings",
+        "title": "Jhalak Settings",
         "width": 720,
         "height": 560,
         "decorations": false,
@@ -78,9 +78,9 @@
   "bundle": {
     "active": true,
     "targets": "all",
-    "createUpdaterArtifacts": true,
-    "publisher": "Lenny Dany Derek",
-    "copyright": "Copyright © 2026 Lenny Dany Derek",
+    "createUpdaterArtifacts": false,
+    "publisher": "Infinite Impression",
+    "copyright": "Copyright © 2026 Infinite Impression. Based on Crest © 2026 Lenny Dany Derek (MIT).",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

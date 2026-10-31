@@ -21,6 +21,17 @@ import SystemModule from './modules/SystemModule'
 import TimerModule from './modules/TimerModule'
 import WeatherModule from './modules/WeatherModule'
 import QuickAccessModule from './modules/QuickAccessModule'
+import WaterModule from './extras/WaterModule'
+import TodoModule from './extras/TodoModule'
+import PrayerModule from './extras/PrayerModule'
+import FiverrModule from './extras/FiverrModule'
+import HudAnnounce from './extras/HudAnnounce'
+import { FiverrAnnounce, PrayerAnnounce, TodoAnnounce, WaterAnnounce } from './extras/ExtraAnnounce'
+import type { WaterFeed } from '../hooks/useWater'
+import type { TodoFeed } from '../hooks/useTodos'
+import type { PrayerFeed } from '../hooks/usePrayer'
+import type { FiverrFeed } from '../hooks/useFiverr'
+import type { MascotMood } from '../hooks/useHud'
 import type { MediaSession } from '../hooks/useMediaSession'
 import type { FileShelfState } from '../hooks/useFileShelf'
 import type { ReminderFeed } from '../hooks/useReminders'
@@ -106,6 +117,20 @@ interface Props {
   metrics: NotchMetrics
   /** How fast the notch's own motion runs, as a percentage. */
   animationSpeed: number
+  /** This fork's cards. */
+  extraFeeds: ExtraFeeds
+  /** The mascot's mood, for the resting pill. */
+  mood: MascotMood
+  /** The minimal-notch preference: the resting pill is a thin black line. */
+  minimal: boolean
+}
+
+export interface ExtraFeeds {
+  water: WaterFeed
+  todos: TodoFeed
+  prayer: PrayerFeed
+  fiverr: FiverrFeed
+  fiverrEnabled: boolean
 }
 
 function ModuleContent({
@@ -123,7 +148,9 @@ function ModuleContent({
   screenshotsEnabled,
   timer,
   animationSpeed,
+  extraFeeds,
 }: {
+  extraFeeds: ExtraFeeds
   module: NotchModule
   session: MediaSession
   shelf: FileShelfState
@@ -167,6 +194,14 @@ function ModuleContent({
       return <ScreenshotsModule feed={screenshots} enabled={screenshotsEnabled} />
     case 'timer':
       return <TimerModule feed={timer} animationSpeed={animationSpeed} />
+    case 'water':
+      return <WaterModule feed={extraFeeds.water} />
+    case 'todo':
+      return <TodoModule feed={extraFeeds.todos} />
+    case 'prayer':
+      return <PrayerModule feed={extraFeeds.prayer} />
+    case 'fiverr':
+      return <FiverrModule feed={extraFeeds.fiverr} enabled={extraFeeds.fiverrEnabled} />
     default:
       return <ModulePlaceholder module={module} />
   }
@@ -204,6 +239,18 @@ function announceKey(announcement: Announcement | null): string {
       // percentage would remount the loader fifty times a download and restart
       // its ring from zero every time.
       return 'update'
+    case 'hud':
+      // Constant per kind, like `update`: holding a volume key re-announces
+      // every step, and the bar has to glide rather than remount.
+      return `hud:${announcement.hud.kind}`
+    case 'water':
+      return 'water'
+    case 'todo':
+      return `todo:${announcement.task.id}:${announcement.firedAt}`
+    case 'prayer':
+      return `prayer:${announcement.name}:${announcement.soon}`
+    case 'fiverr':
+      return `fiverr:${announcement.notification.id}`
     default:
       return 'announce'
   }
@@ -237,6 +284,16 @@ function AnnounceContent({
           progress={announcement.progress}
         />
       )
+    case 'hud':
+      return <HudAnnounce hud={announcement.hud} />
+    case 'water':
+      return <WaterAnnounce a={announcement} />
+    case 'todo':
+      return <TodoAnnounce a={announcement} />
+    case 'prayer':
+      return <PrayerAnnounce a={announcement} />
+    case 'fiverr':
+      return <FiverrAnnounce a={announcement} />
     default:
       // Media is the fallback rather than a case of its own: the announcement is
       // never cleared (see `useNotchState`), so this is also what the banner
@@ -278,6 +335,9 @@ export default function NotchShell({
   hotzoneHint,
   metrics,
   animationSpeed,
+  extraFeeds,
+  mood,
+  minimal,
 }: Props) {
   // The same call the state machine makes, with the same metrics and the same fit
   // — the card that is drawn and the rect that is hit-tested are one function of
@@ -339,7 +399,13 @@ export default function NotchShell({
               animate={{ width, height, opacity: 1, y: 0 }}
               exit={{ width: peek.width, height: peek.height, opacity: 0, y: -8 }}
               transition={cardSpring}
-              style={{ borderRadius: radius.shell, pointerEvents: 'auto' }}
+              style={{
+                borderRadius: minimal && state === 'peek' ? '0 0 6px 6px' : radius.shell,
+                pointerEvents: 'auto',
+                // The minimal notch is a plain black line, the colour of a
+                // laptop bezel, rather than a sliver of glass.
+                ...(minimal && state === 'peek' ? { background: '#000' } : {}),
+              }}
             >
               {/* Keyed on the landing instant, so React remounts it and the CSS
                   animation runs again for a second timer rather than being an
@@ -413,6 +479,7 @@ export default function NotchShell({
                           screenshotsEnabled={screenshotsEnabled}
                           timer={timer}
                           animationSpeed={animationSpeed}
+                          extraFeeds={extraFeeds}
                         />
                       ) : isAnnouncing ? (
                         <AnnounceContent announcement={announcement} session={session} />
@@ -431,6 +498,8 @@ export default function NotchShell({
                           timer={timer.timer}
                           now={timer.now}
                           width={peek.width}
+                          mood={mood}
+                          minimal={minimal}
                         />
                       )}
                     </motion.div>

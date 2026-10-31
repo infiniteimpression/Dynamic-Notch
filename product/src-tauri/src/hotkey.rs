@@ -32,7 +32,7 @@ pub const TOGGLE_EVENT: &str = "hotkey-toggle";
 /// same rule on the writing side, because `settings.json` is hand-editable.
 pub fn parse(accelerator: &str) -> Result<Shortcut, String> {
     let shortcut = Shortcut::from_str(accelerator)
-        .map_err(|_| format!("Crest doesn't recognise the shortcut \"{accelerator}\"."))?;
+        .map_err(|_| format!("Jhalak doesn't recognise the shortcut \"{accelerator}\"."))?;
 
     if shortcut.mods.is_empty() {
         return Err("A shortcut needs at least one of Ctrl, Alt, Shift or Win with it.".into());
@@ -64,7 +64,7 @@ pub fn apply(app: &AppHandle, accelerator: Option<&str>) -> Result<(), String> {
 
     let shortcut = parse(accelerator)?;
     manager.register(shortcut).map_err(|_| {
-        format!("Windows wouldn't give Crest {accelerator} — another app is probably using it.")
+        format!("Windows wouldn't give Jhalak {accelerator} — another app is probably using it.")
     })
 }
 

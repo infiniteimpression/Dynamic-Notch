@@ -22,6 +22,13 @@ import { useTimer } from './hooks/useTimer'
 import { useWeather } from './hooks/useWeather'
 import { useWheelCycle } from './hooks/useWheelCycle'
 import { useWindowsNotifications } from './hooks/useWindowsNotifications'
+import { useHud, useMascotMood } from './hooks/useHud'
+import { useWater } from './hooks/useWater'
+import { useTodos } from './hooks/useTodos'
+import { usePrayer } from './hooks/usePrayer'
+import { useFiverr } from './hooks/useFiverr'
+import { isFiverr } from './types/fiverr'
+import type { Todo } from './types/todo'
 import { timing } from './tokens'
 import {
   resolvePanels,
@@ -91,10 +98,11 @@ export default function App() {
   const metrics = useMemo(
     () => ({
       pillWidth: settings.notchWidth,
-      pillHeight: settings.notchHeight,
+      // Minimal notch: a 6px line, the hover target a thick bezel can hide.
+      pillHeight: settings.extras.minimalNotch ? 6 : settings.notchHeight,
       panelScale: settings.panelScale,
     }),
-    [settings.notchWidth, settings.notchHeight, settings.panelScale],
+    [settings.notchWidth, settings.notchHeight, settings.panelScale, settings.extras.minimalNotch],
   )
 
   // One poll, two consumers: the same banner for arriving Windows notifications,
@@ -117,6 +125,15 @@ export default function App() {
   // what `useWindowsNotifications` wants (it holds the callback in a ref of its
   // own so a new identity does not restart the poll and swallow an arrival).
   const announceRef = useRef<(announcement: Announcement, durationMs: number) => void>(() => {})
+  // The Fiverr log is built after the notification feed (it needs nothing from
+  // it), so the arrival callback reaches it through refs, as it does `announce`.
+  const fiverr = useFiverr(isLeadNotch)
+  const fiverrRecordRef = useRef(fiverr.record)
+  fiverrRecordRef.current = fiverr.record
+  const fiverrOnRef = useRef(settings.extras.fiverrAlerts)
+  fiverrOnRef.current = settings.extras.fiverrAlerts
+  const fiverrSoundRef = useRef(settings.extras.fiverrSound)
+  fiverrSoundRef.current = settings.extras.fiverrSound
 
   const notifications = useWindowsNotifications(
     notificationsEnabled,
@@ -423,6 +440,56 @@ export default function App() {
     ),
   )
 
+  // ── This fork's features ───────────────────────────────────────────────
+  const extras = settings.extras
+
+  useHud(
+    extras,
+    loaded,
+    useCallback((hud) => announce({ kind: 'hud', hud }, 1600), [announce]),
+  )
+
+  const mood = useMascotMood(loaded && extras.mascot && !extras.minimalNotch)
+
+  const water = useWater(
+    extras,
+    isLeadNotch,
+    useCallback(
+      (drankMl: number, goalMl: number) => {
+        announce({ kind: 'water', drankMl, goalMl }, timing.announceMs + 2000)
+      },
+      [announce],
+    ),
+  )
+
+  const todos = useTodos(
+    isLeadNotch,
+    useCallback(
+      (task: Todo) => {
+        announce({ kind: 'todo', task, firedAt: Date.now() }, timing.announceMs + 3000)
+        if (loaded && settings.timerSound) playChime()
+      },
+      [announce, loaded, settings.timerSound],
+    ),
+  )
+
+  const prayer = usePrayer(
+    settings.weatherPlace,
+    extras,
+    useCallback(
+      (name: string, time: string, soon: boolean) => {
+        announce({ kind: 'prayer', name, time, soon }, timing.announceMs + 3000)
+        if (!soon) playChime()
+      },
+      [announce],
+    ),
+  )
+
+  const extraFeeds = useMemo(
+    () => ({ water, todos, prayer, fiverr, fiverrEnabled: notificationsEnabled && extras.fiverrAlerts }),
+    [water, todos, prayer, fiverr, notificationsEnabled, extras.fiverrAlerts],
+  )
+
   const [menu, setMenu] = useState<MenuAnchor | null>(null)
   const closeMenu = useCallback(() => setMenu(null), [])
 
@@ -483,6 +550,9 @@ export default function App() {
         // watch flicker, which reads as broken rather than as inapplicable.
         // Settings now says as much rather than leaving the switch looking dead.
         hotzoneHint={loaded && settings.hotzoneHint && !settings.alwaysOnTop}
+        extraFeeds={extraFeeds}
+        mood={mood}
+        minimal={loaded && extras.minimalNotch}
       />
 
       {menu && <ContextMenu anchor={menu} onClose={closeMenu} />}

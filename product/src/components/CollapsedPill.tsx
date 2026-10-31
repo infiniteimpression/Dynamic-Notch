@@ -7,6 +7,9 @@ import type { BatteryStatus } from '../types/system'
 import { phaseOf, type TimerState } from '../types/timer'
 import type { Weather } from '../types/weather'
 import { color, radius } from '../tokens'
+import { AnimatePresence, motion } from 'framer-motion'
+import MascotEyes from './extras/MascotEyes'
+import type { MascotMood } from '../hooks/useHud'
 
 /**
  * The collapsed pill — the notch at rest. 264×34 by default, and adjustable: see
@@ -127,6 +130,8 @@ export default function CollapsedPill({
   timer,
   now,
   width,
+  mood = 'awake',
+  minimal = false,
 }: {
   session: MediaSession
   battery: BatteryStatus | null
@@ -173,6 +178,10 @@ export default function CollapsedPill({
    * the columns on every one of them.
    */
   width: number
+  /** The mascot's mood. Anything but `awake` takes the clock's place. */
+  mood?: MascotMood
+  /** Minimal notch: the pill is a thin line and draws nothing at all. */
+  minimal?: boolean
 }) {
   const { media } = session
   const isPlaying = media?.isPlaying ?? false
@@ -186,6 +195,12 @@ export default function CollapsedPill({
   // shows 9:41 would be paying the countdown's cost with no countdown running.
   const clock = useClock()
   const column = columnWidth(width)
+
+  if (minimal) return null
+
+  // The mascot only for an empty desk: never over a running timer or music,
+  // which are the two things the pill exists to keep in view.
+  const showMascot = mood !== 'awake' && !hasTimer && !isPlaying
 
   return (
     <div
@@ -281,20 +296,44 @@ export default function CollapsedPill({
           readouts settle into being ambient, which is what they are: the clock is
           why anyone looks at the resting notch, and the charge and the
           temperature are what they notice while they are there. */}
-      <span
-        style={{
-          justifySelf: 'center',
-          fontSize: 14,
-          fontWeight: 600,
-          letterSpacing: '-.01em',
-          color: color.text.primary,
-          whiteSpace: 'nowrap',
-          // Stops the pill twitching as digits change width.
-          fontVariantNumeric: 'tabular-nums',
-        }}
-      >
-        {formatClock(clock)}
-      </span>
+      <div style={{ justifySelf: 'center', display: 'grid', placeItems: 'center' }}>
+        <AnimatePresence mode="popLayout" initial={false}>
+          {showMascot ? (
+            <motion.div
+              key="mascot"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ type: 'spring', stiffness: 420, damping: 30 }}
+            >
+              <MascotEyes mood={mood as Exclude<MascotMood, 'awake'>} />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="clock"
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ type: 'spring', stiffness: 420, damping: 30 }}
+            >
+              <span
+                style={{
+                  justifySelf: 'center',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  letterSpacing: '-.01em',
+                  color: color.text.primary,
+                  whiteSpace: 'nowrap',
+                  // Stops the pill twitching as digits change width.
+                  fontVariantNumeric: 'tabular-nums',
+                }}
+              >
+                {formatClock(clock)}
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* ── The charge ─────────────────────────────────────────────────────
           Its own chip, which also carries the state as a tint — see the badge.

@@ -392,6 +392,19 @@ export const size = {
    * ceiling the largest cards set.
    */
   timer: { width: 400, height: 190 },
+  /*
+   * This fork's cards — NOT from the design export. Each height is the sum of
+   * boxes pinned in its component, the same rule every card above follows:
+   *
+   * water  = 26 nav + 14 + 56 readout + 10 + 64 chart + 10 + 30 buttons + 14 = 224
+   * todo   = 26 nav + 12 + 32 add row + 8 + 4 × 36 rows + 12            = 234
+   * prayer = 26 nav + 14 + 50 next-up + 10 + (2 × 52 tiles + 8) + 14     = 226
+   * fiverr = 26 nav + 12 + 44 stats + 8 + 3 × 44 rows + 8 + 28 actions + 12 = 270
+   */
+  water: { width: 380, height: 224 },
+  todo: { width: 420, height: 234 },
+  prayer: { width: 400, height: 226 },
+  fiverr: { width: 420, height: 270 },
 } as const
 
 /** Springs — NOT from the design export (it is static). Tuned for Fluent motion. */

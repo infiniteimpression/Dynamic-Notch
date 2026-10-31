@@ -382,7 +382,7 @@ export default function QuickAccessModule() {
             color: color.text.muted,
           }}
         >
-          Windows would not hand Crest its audio endpoints.
+          Windows would not hand Jhalak its audio endpoints.
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>

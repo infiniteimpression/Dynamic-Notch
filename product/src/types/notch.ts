@@ -4,6 +4,8 @@ import type { PerfAlert } from './perf'
 import type { Reminder } from './reminders'
 import type { Screenshot } from './screenshots'
 import type { SystemEvent } from './system'
+import type { HudEvent } from './extras'
+import type { Todo } from './todo'
 
 /**
  * Visibility state machine. Single source of truth lives in `useNotchState`.
@@ -57,6 +59,10 @@ export type NotchModule =
   | 'quickAccess'
   | 'screenshots'
   | 'timer'
+  | 'water'
+  | 'todo'
+  | 'prayer'
+  | 'fiverr'
 
 /**
  * The **default** order and the full set of modules that exist.
@@ -83,6 +89,11 @@ export const MODULES: readonly NotchModule[] = [
   'quickAccess',
   'screenshots',
   'timer',
+  // Appended, never inserted — see the note on MODULES. This fork's cards.
+  'water',
+  'todo',
+  'prayer',
+  'fiverr',
 ] as const
 
 /**
@@ -108,6 +119,10 @@ export const MODULE_LABELS: Record<NotchModule, string> = {
   quickAccess: 'Quick Access',
   screenshots: 'Screenshots',
   timer: 'Timer',
+  water: 'Water',
+  todo: 'To-do',
+  prayer: 'Prayer times',
+  fiverr: 'Fiverr',
 }
 
 /**
@@ -235,6 +250,38 @@ export type Announcement =
    * changed per tick would remount the loader fifty times and reset the ring.
    */
   | { kind: 'update'; phase: UpdatePhase; version: string | null; progress: UpdateProgress | null }
+  /**
+   * Volume, brightness, Caps Lock or keyboard language. Re-announced on every
+   * step while a key is held, with a cross-fade key that is constant per kind,
+   * so the level bar glides instead of the banner remounting.
+   */
+  | { kind: 'hud'; hud: HudEvent }
+  /** Time for a glass of water. Has the water card behind it. */
+  | { kind: 'water'; drankMl: number; goalMl: number }
+  /** A to-do's time has come. Has the to-do card behind it. */
+  | { kind: 'todo'; task: Todo; firedAt: number }
+  /** A prayer time, or the heads-up before one. Has the prayer card behind it. */
+  | { kind: 'prayer'; name: string; time: string; soon: boolean }
+  /** A Fiverr order or message, recognised in a Windows notification. */
+  | { kind: 'fiverr'; notification: WinNotification; category: FiverrCategory }
+
+/** What a Fiverr notification is about, as far as its text says. */
+export type FiverrCategory = 'order' | 'message' | 'review' | 'payment' | 'other'
+
+/**
+ * The card a banner opens into when hovered, if it has one. One table rather
+ * than a chain of ifs in the state machine, so a new banner kind is one line.
+ */
+export const CARD_BEHIND: Partial<Record<Announcement['kind'], NotchModule>> = {
+  media: 'media',
+  performance: 'system',
+  reminder: 'calendar',
+  screenshot: 'screenshots',
+  water: 'water',
+  todo: 'todo',
+  prayer: 'prayer',
+  fiverr: 'fiverr',
+}
 
 /** A rectangle in window-local CSS pixels. */
 export interface Rect {

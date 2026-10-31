@@ -5,6 +5,7 @@ import { DEFAULT_METRICS, contentRect, type NotchMetrics, type NotificationsFit 
 import { timing } from '../tokens'
 import {
   MODULES,
+  CARD_BEHIND,
   STATE_RANK,
   rectContains,
   type Announcement,
@@ -388,10 +389,9 @@ export function useNotchState({
       const dwells =
         state === 'peek' ||
         (state === 'announce' &&
-          (kind === 'media' ||
-            kind === 'performance' ||
-            kind === 'reminder' ||
-            kind === 'screenshot'))
+          kind !== undefined &&
+          CARD_BEHIND[kind] !== undefined &&
+          modulesRef.current.includes(CARD_BEHIND[kind]))
       if (dwells) {
         // Guarded so a re-render mid-dwell does not restart the countdown.
         if (!dwellRef.current) {
@@ -557,10 +557,10 @@ export function useNotchState({
     // reading and the next hover would land somewhere they did not choose. So the
     // old selection is kept and put back by the retract below.
     restoreModuleRef.current = held ?? moduleRef.current
-    if (next.kind === 'media') setActiveModule('media')
-    if (next.kind === 'performance') setActiveModule('system')
-    if (next.kind === 'reminder') setActiveModule('calendar')
-    if (next.kind === 'screenshot') setActiveModule('screenshots')
+    // Only to a card that is actually in the ring: a hidden card is not
+    // somewhere the arrows can leave again.
+    const behind = CARD_BEHIND[next.kind]
+    if (behind && modulesRef.current.includes(behind)) setActiveModule(behind)
     setState('announce')
 
     announceRef.current = setTimeout(() => {

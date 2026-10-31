@@ -1,3 +1,4 @@
+import { PRAYER_METHODS } from '../../types/extras'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { invoke } from '@tauri-apps/api/core'
@@ -119,6 +120,7 @@ type Pane =
   | 'display'
   | 'weather'
   | 'notes'
+  | 'extras'
   | 'settings'
 
 /** Nav entries, in the order they appear in the sidebar. */
@@ -203,6 +205,15 @@ const PANES: { id: Pane; label: string; icon: ReactNode }[] = [
         <path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H15l4 4v13.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 20.5z" />
         <path d="M14.5 3v4.5H19" />
         <path d="M8.5 13h7M8.5 16.5h4.5" />
+      </Icon>
+    ),
+  },
+  {
+    id: 'extras',
+    label: 'Extras',
+    icon: (
+      <Icon size={16}>
+        <path d="M12 3.5l2.2 5 5.3.5-4 3.6 1.2 5.3L12 15.2l-4.7 2.7 1.2-5.3-4-3.6 5.3-.5z" />
       </Icon>
     ),
   },
@@ -312,6 +323,59 @@ const FEATURES: { id: string; title: string; body: string; icon: ReactNode }[] =
       <Icon>
         <rect x="3.5" y="5" width="17" height="16" rx="2.5" />
         <path d="M3.5 10h17M8 3.5v3M16 3.5v3" />
+      </Icon>
+    ),
+  },
+  {
+    id: 'water',
+    title: 'Water reminder',
+    body: 'Log a glass in one click, see the day as a chart, and get a nudge when it has been a while.',
+    icon: (
+      <Icon>
+        <path d="M12 3.5c3 3.6 5.5 6.9 5.5 10a5.5 5.5 0 0 1-11 0c0-3.1 2.5-6.4 5.5-10z" />
+      </Icon>
+    ),
+  },
+  {
+    id: 'todo',
+    title: 'To-do with reminders',
+    body: 'Jot a task, give it a time, and the notch taps you when it is due. Snooze if you need ten more minutes.',
+    icon: (
+      <Icon>
+        <path d="M4.5 7l1.8 1.8L9.5 5.5M4.5 15l1.8 1.8 3.2-3.3M12.5 7.5h7M12.5 15.5h7" />
+      </Icon>
+    ),
+  },
+  {
+    id: 'prayer',
+    title: 'Prayer times',
+    body: 'Today’s five prayers for your city with a live countdown, a heads-up before each and a chime at the time.',
+    icon: (
+      <Icon>
+        <path d="M15.5 4.5a7.5 7.5 0 1 0 4 10.5 6 6 0 0 1-4-10.5z" />
+      </Icon>
+    ),
+  },
+  {
+    id: 'fiverr',
+    title: 'Fiverr alerts',
+    body: 'New orders and messages in their own green banner, with today’s counts and a one-click way to your inbox.',
+    icon: (
+      <Icon>
+        <rect x="3.5" y="5.5" width="17" height="13" rx="2.5" />
+        <path d="M3.5 9.5h17M8 14h3" />
+      </Icon>
+    ),
+  },
+  {
+    id: 'popups',
+    title: 'Pop-ups and a mascot',
+    body: 'Volume, brightness, Caps Lock and language overlays, a sleepy pair of eyes on an empty desk, and it steps aside for full screen.',
+    icon: (
+      <Icon>
+        <circle cx="9" cy="12" r="1.6" fill="currentColor" />
+        <circle cx="15" cy="12" r="1.6" fill="currentColor" />
+        <rect x="3.5" y="6" width="17" height="12" rx="6" />
       </Icon>
     ),
   },
@@ -770,15 +834,20 @@ function AboutPane({ version }: { version: string }) {
   return (
     <>
       <Paragraph>
-        <strong style={{ color: color.text.strong, fontWeight: 600 }}>Crest</strong> is a dynamic
+        <strong style={{ color: color.text.strong, fontWeight: 600 }}>Jhalak</strong> is a dynamic
         notch for Windows 11. It rests against the top edge of your screen, hidden until you reach
         for it, and gets out of the way the moment your cursor leaves.
       </Paragraph>
       <Paragraph>
         The small things you break your flow for — skipping a track, opening an app, finding
         something you copied ten minutes ago — normally each cost you a window to summon and
-        dismiss. Crest gives them one surface that is always a flick of the mouse away and takes up
+        dismiss. Jhalak gives them one surface that is always a flick of the mouse away and takes up
         none of your screen while you work.
+      </Paragraph>
+      <Paragraph>
+        Made by Infinite Impression. Built on{' '}
+        <strong style={{ color: color.text.strong, fontWeight: 600 }}>Crest</strong> by Lenny Dany,
+        used under the MIT licence.
       </Paragraph>
 
       <GroupLabel>What it does</GroupLabel>
@@ -1026,7 +1095,7 @@ function AppearancePane({
 
       <LiveRange
         title="Corner radius"
-        body="How rounded every Crest surface is — the notch's cards, the tray menu and this window. All the way down is square corners."
+        body="How rounded every Jhalak surface is — the notch's cards, the tray menu and this window. All the way down is square corners."
         value={settings.cornerRadius}
         bounds={CORNER_RADIUS}
         format={(px) => `${px} px`}
@@ -1261,7 +1330,7 @@ function DisplayPane({ api }: { api: ReturnType<typeof useSettings> }) {
   const count = displays.length
   const summary =
     count === 0
-      ? 'Crest can’t see any screens at the moment.'
+      ? 'Jhalak can’t see any screens at the moment.'
       : count === 1
         ? 'One screen is connected, so the notch lives on it.'
         : `${count} screens are connected. Pick the one the notch comes down on, or put it on all of them.`
@@ -1510,7 +1579,7 @@ function SettingsPane({ api }: { api: ReturnType<typeof useSettings> }) {
 
       <SettingRow
         title="Mute Windows' own banners"
-        body="Stops Windows drawing its pop-up in the bottom-right corner, so a notification appears in the notch and nowhere else. It still lands in the notification centre, and Windows gets its banners back if you turn this off or quit Crest."
+        body="Stops Windows drawing its pop-up in the bottom-right corner, so a notification appears in the notch and nowhere else. It still lands in the notification centre, and Windows gets its banners back if you turn this off or quit Jhalak."
         on={settings.muteWindowsBanners}
         onToggle={() => setMuteWindowsBanners(!settings.muteWindowsBanners)}
         // The Store build cannot do this at all: a packaged app's registry writes
@@ -1537,7 +1606,7 @@ function SettingsPane({ api }: { api: ReturnType<typeof useSettings> }) {
           refuses to silence Windows on top of that. */}
       {notificationAccess === false && (
         <p style={{ margin: '2px 12px 0', fontSize: 11.5, lineHeight: 1.5, color: color.text.muted }}>
-          Windows hasn't given Crest access to your notifications. Turn on{' '}
+          Windows hasn't given Jhalak access to your notifications. Turn on{' '}
           <strong style={{ color: color.text.secondary, fontWeight: 500 }}>
             Settings → Privacy &amp; security → Notifications
           </strong>
@@ -1552,7 +1621,7 @@ function SettingsPane({ api }: { api: ReturnType<typeof useSettings> }) {
       {!bannerMutingSupported && notificationAccess !== false && (
         <p style={{ margin: '2px 12px 0', fontSize: 11.5, lineHeight: 1.5, color: color.text.muted }}>
           Muting isn't available in the Microsoft Store version — Windows keeps a packaged app's
-          copy of that setting to itself, so Crest can't reach the one the pop-up reads.
+          copy of that setting to itself, so Jhalak can't reach the one the pop-up reads.
           Notifications still appear in the notch; Windows' own banner appears too.
         </p>
       )}
@@ -1584,7 +1653,7 @@ function SettingsPane({ api }: { api: ReturnType<typeof useSettings> }) {
 
       <SettingRow
         title="Keep recent screenshots"
-        body="Watches the folders Windows saves screenshots to, shows the last few on a card, and drops a thumbnail down the moment you take one — so you can drag it straight into whatever it was for. Crest only reads them: nothing is copied, moved or deleted."
+        body="Watches the folders Windows saves screenshots to, shows the last few on a card, and drops a thumbnail down the moment you take one — so you can drag it straight into whatever it was for. Jhalak only reads them: nothing is copied, moved or deleted."
         on={settings.screenshots}
         onToggle={() => setScreenshots(!settings.screenshots)}
         icon={
@@ -1604,7 +1673,7 @@ function SettingsPane({ api }: { api: ReturnType<typeof useSettings> }) {
 
       <SettingRow
         title="Play a chime when a timer finishes"
-        body="A short two-note tone the moment a countdown lands — the only sound Crest makes. The notch still drops its banner and flashes the card either way, so turning this off leaves you told, just not out loud."
+        body="A short two-note tone the moment a countdown lands — the only sound Jhalak makes. The notch still drops its banner and flashes the card either way, so turning this off leaves you told, just not out loud."
         on={settings.timerSound}
         onToggle={() => setTimerSound(!settings.timerSound)}
         icon={
@@ -1618,6 +1687,180 @@ function SettingsPane({ api }: { api: ReturnType<typeof useSettings> }) {
       {error && (
         <p style={{ margin: '8px 12px 0', fontSize: 11.5, color: color.fileRed }}>{error}</p>
       )}
+    </>
+  )
+}
+
+
+/**
+ * Everything this fork added: the mascot, the minimal notch, full-screen
+ * hiding, the pop-ups, water, prayer times and Fiverr alerts. Their cards are
+ * switched on and off in Panels like every other card; this pane is how each
+ * one behaves.
+ */
+function ExtrasPane({ api }: { api: ReturnType<typeof useSettings> }) {
+  const { settings, setExtras } = api
+  const x = settings.extras
+  const hour = (h: number) => {
+    const d = new Date()
+    d.setHours(h % 24, 0, 0, 0)
+    return h === 24 ? 'midnight' : d.toLocaleTimeString(undefined, { hour: 'numeric' })
+  }
+
+  return (
+    <>
+      <h3 style={{ ...sectionLabel, margin: '0 0 8px' }}>Notch</h3>
+      <SettingRow
+        title="Mascot"
+        body="When your PC has been quiet for a while, the clock steps aside and a pair of eyes appears. They doze off, and wave hello when you come back."
+        on={x.mascot}
+        onToggle={() => setExtras({ mascot: !x.mascot })}
+        disabled={x.minimalNotch}
+        icon={<Icon><circle cx="9" cy="12" r="1.6" fill="currentColor" /><circle cx="15" cy="12" r="1.6" fill="currentColor" /><rect x="3.5" y="6" width="17" height="12" rx="6" /></Icon>}
+      />
+      <SettingRow
+        title="Minimal notch"
+        body="For laptops with a thick top bezel: the resting notch becomes a thin black line. Hovering, pop-ups and every card still work as usual."
+        on={x.minimalNotch}
+        onToggle={() => setExtras({ minimalNotch: !x.minimalNotch })}
+        icon={<Icon><path d="M5 6h14" strokeWidth={3} /><rect x="3" y="4" width="18" height="15" rx="2" /></Icon>}
+      />
+      <SettingRow
+        title="Hide in full screen"
+        body="Steps aside for full-screen games, videos and slides on the same screen, and comes back when you leave them."
+        on={x.hideInFullscreen}
+        onToggle={() => setExtras({ hideInFullscreen: !x.hideInFullscreen })}
+        icon={<Icon><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" /></Icon>}
+      />
+
+      <h3 style={{ ...sectionLabel, margin: '18px 0 8px' }}>Pop-ups</h3>
+      <SettingRow
+        title="Volume"
+        body="A clean overlay with a level bar when the volume changes or you mute."
+        on={x.hudVolume}
+        onToggle={() => setExtras({ hudVolume: !x.hudVolume })}
+        icon={<Icon><path d="M4 9h3l5-4v14l-5-4H4z" /><path d="M16 9.5a4 4 0 0 1 0 5" /></Icon>}
+      />
+      <SettingRow
+        title="Brightness"
+        body="Shown when the screen brightness changes. Works on laptop screens; most desktop monitors don't report it."
+        on={x.hudBrightness}
+        onToggle={() => setExtras({ hudBrightness: !x.hudBrightness })}
+        icon={<Icon><circle cx="12" cy="12" r="4" /><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4" /></Icon>}
+      />
+      <SettingRow
+        title="Caps Lock"
+        body="A nudge when Caps Lock turns on or off."
+        on={x.hudCapsLock}
+        onToggle={() => setExtras({ hudCapsLock: !x.hudCapsLock })}
+        icon={<Icon><path d="M12 4.5l6.5 7h-3.8v4H9.3v-4H5.5z" /><path d="M8.5 19.5h7" /></Icon>}
+      />
+      <SettingRow
+        title="Keyboard language"
+        body="Shows the new input language when you switch layouts, for example between English and Urdu. Only reads which layout is active — never what you type."
+        on={x.hudLanguage}
+        onToggle={() => setExtras({ hudLanguage: !x.hudLanguage })}
+        icon={<Icon><circle cx="12" cy="12" r="8.5" /><path d="M3.5 12h17M12 3.5c2.4 2.3 3.6 5.1 3.6 8.5S14.4 18.2 12 20.5M12 3.5C9.6 5.8 8.4 8.6 8.4 12s1.2 6.2 3.6 8.5" /></Icon>}
+      />
+
+      <h3 style={{ ...sectionLabel, margin: '18px 0 8px' }}>Water</h3>
+      <SettingRow
+        title="Water reminders"
+        body="A gentle banner when it's been a while since your last glass, during your active hours, until you reach today's goal."
+        on={x.waterReminders}
+        onToggle={() => setExtras({ waterReminders: !x.waterReminders })}
+        icon={<Icon><path d="M12 3.5c3 3.6 5.5 6.9 5.5 10a5.5 5.5 0 0 1-11 0c0-3.1 2.5-6.4 5.5-10z" /></Icon>}
+      />
+      <LiveRange
+        title="Daily goal"
+        body="How much you aim to drink in a day."
+        icon={<Icon><path d="M6 4h12l-1.5 16h-9z" /></Icon>}
+        value={x.waterGoalMl}
+        bounds={{ min: 500, max: 5000, step: 250 }}
+        format={(v) => `${(v / 1000).toFixed(2).replace(/0$/, '')} L`}
+        onCommit={(v) => setExtras({ waterGoalMl: v })}
+      />
+      <LiveRange
+        title="Glass size"
+        body="What one press of Drink adds."
+        icon={<Icon><path d="M7 5h10l-1 14H8z" /></Icon>}
+        value={x.waterSipMl}
+        bounds={{ min: 100, max: 1000, step: 50 }}
+        format={(v) => `${v} ml`}
+        onCommit={(v) => setExtras({ waterSipMl: v })}
+      />
+      <LiveRange
+        title="Remind every"
+        body="Counted from your last glass, so drinking resets it."
+        icon={<Icon><circle cx="12" cy="12" r="8" /><path d="M12 8v4l2.5 1.5" /></Icon>}
+        value={x.waterEveryMin}
+        bounds={{ min: 15, max: 180, step: 15 }}
+        format={(v) => (v < 60 ? `${v} min` : `${Math.floor(v / 60)}h${v % 60 ? ` ${v % 60}m` : ''}`)}
+        onCommit={(v) => setExtras({ waterEveryMin: v })}
+      />
+      <LiveRange
+        title="Active from"
+        body="No reminders before this hour."
+        icon={<Icon><path d="M4 18h16M7 14a5 5 0 0 1 10 0" /></Icon>}
+        value={x.waterStartHour}
+        bounds={{ min: 5, max: 14, step: 1 }}
+        format={hour}
+        onCommit={(v) => setExtras({ waterStartHour: v })}
+      />
+      <LiveRange
+        title="Active until"
+        body="No reminders from this hour on."
+        icon={<Icon><path d="M15.5 4.5a7.5 7.5 0 1 0 4 10.5 6 6 0 0 1-4-10.5z" /></Icon>}
+        value={x.waterEndHour}
+        bounds={{ min: 15, max: 24, step: 1 }}
+        format={hour}
+        onCommit={(v) => setExtras({ waterEndHour: v })}
+      />
+
+      <h3 style={{ ...sectionLabel, margin: '18px 0 8px' }}>Prayer times</h3>
+      <SettingRow
+        title="Prayer alerts"
+        body="A heads-up ten minutes before each prayer and a banner with a soft chime at the time. Uses your Weather location."
+        on={x.prayerAlerts}
+        onToggle={() => setExtras({ prayerAlerts: !x.prayerAlerts })}
+        icon={<Icon><path d="M15.5 4.5a7.5 7.5 0 1 0 4 10.5 6 6 0 0 1-4-10.5z" /></Icon>}
+      />
+      <ChoiceRow
+        title="Asr calculation"
+        body="Hanafi is what most mosques in Pakistan follow."
+        options={[
+          { id: '1', label: 'Hanafi' },
+          { id: '0', label: 'Standard' },
+        ]}
+        value={String(x.prayerSchool) as '0' | '1'}
+        onSelect={(id) => setExtras({ prayerSchool: Number(id) })}
+        icon={<Icon><circle cx="12" cy="12" r="8" /><path d="M12 7v5l3 3" /></Icon>}
+      />
+      <ChoiceRow
+        title="Method"
+        body={PRAYER_METHODS.find((m) => m.id === x.prayerMethod)?.label ?? 'Custom'}
+        options={PRAYER_METHODS.slice(0, 4).map((m) => ({ id: String(m.id), label: m.label.split(' (')[0].split(',')[0] }))}
+        value={String(x.prayerMethod)}
+        onSelect={(id) => setExtras({ prayerMethod: Number(id) })}
+        icon={<Icon><path d="M4 19h16M6 19V9l6-5 6 5v10" /></Icon>}
+      />
+
+      <h3 style={{ ...sectionLabel, margin: '18px 0 8px' }}>Fiverr</h3>
+      <SettingRow
+        title="Fiverr alerts"
+        body="Recognises Fiverr's notifications and shows orders and messages with their own green banner and card. Allow notifications for fiverr.com in your browser, and keep “Notifications in the notch” on."
+        on={x.fiverrAlerts}
+        onToggle={() => setExtras({ fiverrAlerts: !x.fiverrAlerts })}
+        icon={<Icon><rect x="3.5" y="5.5" width="17" height="13" rx="2.5" /><path d="M3.5 9.5h17M8 14h3" /></Icon>}
+      />
+      <SettingRow
+        title="Fiverr sound"
+        body="A chime when a Fiverr alert arrives, so a new order is hard to miss."
+        on={x.fiverrSound}
+        onToggle={() => setExtras({ fiverrSound: !x.fiverrSound })}
+        disabled={!x.fiverrAlerts}
+        icon={<Icon><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z" /><path d="M10 20.5a2 2 0 0 0 4 0" /></Icon>}
+      />
     </>
   )
 }
@@ -1757,7 +2000,7 @@ export default function SettingsWindow() {
                 data-tauri-drag-region
                 style={{ fontSize: 13, fontWeight: 600, color: color.text.primary }}
               >
-                Crest
+                Jhalak
               </span>
             </div>
 
@@ -1869,6 +2112,8 @@ export default function SettingsWindow() {
                     <WeatherPane api={api} />
                   ) : pane === 'notes' ? (
                     <NotesPane />
+                  ) : pane === 'extras' ? (
+                    <ExtrasPane api={api} />
                   ) : (
                     <SettingsPane api={api} />
                   )}

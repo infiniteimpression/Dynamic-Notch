@@ -586,6 +586,88 @@ pub struct Settings {
     /// `screenshots` both have.
     #[serde(default = "timer_sound_default")]
     pub timer_sound: bool,
+    /// Everything this fork added on top of Crest — mascot, minimal notch,
+    /// pop-ups, water, prayer times and Fiverr alerts. One nested block with one
+    /// setter rather than eighteen commands: none of these has anything for
+    /// `apply` to do except `hide_in_fullscreen`, which `hud.rs` reads live.
+    #[serde(default)]
+    pub extras: Extras,
+}
+
+fn yes() -> bool {
+    true
+}
+fn water_goal_default() -> u32 {
+    2000
+}
+fn water_sip_default() -> u32 {
+    250
+}
+fn water_start_default() -> u32 {
+    9
+}
+fn water_end_default() -> u32 {
+    21
+}
+fn water_every_default() -> u32 {
+    60
+}
+fn prayer_method_default() -> u32 {
+    // University of Islamic Sciences, Karachi.
+    1
+}
+fn prayer_school_default() -> u32 {
+    // Hanafi Asr.
+    1
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Extras {
+    #[serde(default = "yes")]
+    pub mascot: bool,
+    #[serde(default)]
+    pub minimal_notch: bool,
+    #[serde(default = "yes")]
+    pub hide_in_fullscreen: bool,
+    #[serde(default = "yes")]
+    pub hud_volume: bool,
+    #[serde(default = "yes")]
+    pub hud_brightness: bool,
+    #[serde(default = "yes")]
+    pub hud_caps_lock: bool,
+    #[serde(default = "yes")]
+    pub hud_language: bool,
+    #[serde(default = "yes")]
+    pub water_reminders: bool,
+    #[serde(default = "water_goal_default")]
+    pub water_goal_ml: u32,
+    #[serde(default = "water_sip_default")]
+    pub water_sip_ml: u32,
+    #[serde(default = "water_start_default")]
+    pub water_start_hour: u32,
+    #[serde(default = "water_end_default")]
+    pub water_end_hour: u32,
+    #[serde(default = "water_every_default")]
+    pub water_every_min: u32,
+    #[serde(default = "yes")]
+    pub prayer_alerts: bool,
+    #[serde(default = "prayer_method_default")]
+    pub prayer_method: u32,
+    #[serde(default = "prayer_school_default")]
+    pub prayer_school: u32,
+    #[serde(default = "yes")]
+    pub fiverr_alerts: bool,
+    #[serde(default = "yes")]
+    pub fiverr_sound: bool,
+}
+
+impl Default for Extras {
+    fn default() -> Self {
+        // Round-tripped through serde so the field defaults above are the only
+        // copy — a hand-written literal here would be a second one to drift.
+        serde_json::from_str("{}").expect("every Extras field has a default")
+    }
 }
 
 impl Default for Settings {
@@ -614,6 +696,7 @@ impl Default for Settings {
             hotkey: None,
             screenshots: screenshots_default(),
             timer_sound: timer_sound_default(),
+            extras: Extras::default(),
         }
     }
 }
@@ -1176,7 +1259,7 @@ pub fn set_mute_windows_banners(
     if enabled {
         if !notifications::banner_muting_supported() {
             return Err(
-                "The Microsoft Store version of Crest can't change this — Windows keeps a \
+                "The Microsoft Store version of Jhalak can't change this — Windows keeps a \
                  packaged app's copy of the setting to itself. Windows' own banners will keep \
                  appearing alongside the notch."
                     .into(),
@@ -1187,7 +1270,7 @@ pub fn set_mute_windows_banners(
         }
         if !notifications::access_allowed() {
             return Err(
-                "Windows hasn't given Crest access to notifications, so the notch has nothing to \
+                "Windows hasn't given Jhalak access to notifications, so the notch has nothing to \
                  show. Turn on Privacy & security → Notifications and try again."
                     .into(),
             );
@@ -1671,4 +1754,31 @@ pub fn settings_close(app: AppHandle) {
     if let Some(win) = app.get_webview_window(SETTINGS_LABEL) {
         let _ = win.hide();
     }
+}
+
+/// Store the whole `extras` block at once. See `Extras`.
+///
+/// Clamped here because `settings.json` is hand-editable and a water goal of
+/// zero or an end hour before the start would divide or loop on the frontend.
+#[tauri::command]
+pub fn set_extras(
+    app: AppHandle,
+    current: State<'_, Current>,
+    mut extras: Extras,
+) -> Result<Extras, String> {
+    extras.water_goal_ml = extras.water_goal_ml.clamp(250, 8000);
+    extras.water_sip_ml = extras.water_sip_ml.clamp(50, 2000);
+    extras.water_start_hour = extras.water_start_hour.min(23);
+    extras.water_end_hour = extras.water_end_hour.clamp(extras.water_start_hour + 1, 24);
+    extras.water_every_min = extras.water_every_min.clamp(15, 240);
+    extras.prayer_school = extras.prayer_school.min(1);
+
+    let mut settings = current.get(&app);
+    settings.extras = extras.clone();
+    current.set(settings.clone());
+    save(&app, &settings)?;
+
+    let _ = app.emit("settings-changed", settings.clone());
+
+    Ok(extras)
 }

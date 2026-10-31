@@ -87,7 +87,10 @@ pub struct UpdateInfo {
 /// the exclusion covers the manual path too — see `store_managed` below.
 #[tauri::command]
 pub fn updater_auto_allowed() -> bool {
-    crate::autostart::running_installed_build() && !crate::autostart::is_packaged()
+    // Jhalak: never. The endpoint baked into the updater plugin is upstream
+    // Crest's, signed with upstream's key — following it would install stock
+    // Crest over this build. New versions come from this fork's own releases.
+    false
 }
 
 /// The refusal both update commands share when Crest is running from an MSIX.
@@ -119,14 +122,17 @@ pub fn updater_auto_allowed() -> bool {
 /// learns nothing, and the message explaining why never reaches them.
 #[tauri::command]
 pub fn updater_store_managed() -> bool {
-    crate::autostart::is_packaged()
+    // True for every Jhalak build: it hides the tray's "Check for updates" row,
+    // which would otherwise reach upstream Crest's release feed. See
+    // `updater_auto_allowed`.
+    true
 }
 
 fn store_managed() -> Option<String> {
-    crate::autostart::is_packaged().then(|| {
-        "Crest was installed from the Microsoft Store, which keeps it up to date."
-            .to_string()
-    })
+    Some(
+        "Jhalak updates come from its own GitHub releases — download the new installer there."
+            .to_string(),
+    )
 }
 
 /// Ask the endpoint what the latest release is.

@@ -245,6 +245,39 @@ const MODULE_ROWS: Record<NotchModule, { label: string; icon: ReactElement }> = 
       </Icon>
     ),
   },
+  water: {
+    label: 'Water',
+    icon: (
+      <Icon>
+        <path d="M12 3.5c3 3.6 5.5 6.9 5.5 10a5.5 5.5 0 0 1-11 0c0-3.1 2.5-6.4 5.5-10z" />
+      </Icon>
+    ),
+  },
+  todo: {
+    label: 'To-do',
+    icon: (
+      <Icon>
+        <path d="M4.5 7l1.8 1.8L9.5 5.5M4.5 15l1.8 1.8 3.2-3.3M12.5 7.5h7M12.5 15.5h7" />
+      </Icon>
+    ),
+  },
+  prayer: {
+    label: 'Prayer times',
+    icon: (
+      <Icon>
+        <path d="M15.5 4.5a7.5 7.5 0 1 0 4 10.5 6 6 0 0 1-4-10.5z" />
+      </Icon>
+    ),
+  },
+  fiverr: {
+    label: 'Fiverr',
+    icon: (
+      <Icon>
+        <rect x="3.5" y="5.5" width="17" height="13" rx="2.5" />
+        <path d="M3.5 9.5h17M8 14h3" />
+      </Icon>
+    ),
+  },
 }
 
 /**
@@ -302,7 +335,7 @@ const GROUPS: Row[][] = [
   [
     {
       id: 'quit',
-      label: 'Quit Crest',
+      label: 'Quit Jhalak',
       danger: true,
       action: { kind: 'quit' },
       icon: (
@@ -560,7 +593,7 @@ export default function TrayMenu() {
             >
               C
             </div>
-            <span style={{ fontSize: 13, fontWeight: 600, color: color.text.primary }}>Crest</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: color.text.primary }}>Jhalak</span>
             <span style={{ ...sectionLabel, marginLeft: 'auto' }}>{version}</span>
           </header>
 
