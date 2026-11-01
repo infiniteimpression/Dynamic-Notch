@@ -394,7 +394,7 @@ export default function NotchShell({
           {state !== 'hidden' && (
             <motion.div
               key="card"
-              className="mica"
+              className="mica notch-card"
               initial={{ width: peek.width, height: peek.height, opacity: 0, y: -8 }}
               animate={{ width, height, opacity: 1, y: 0 }}
               exit={{ width: peek.width, height: peek.height, opacity: 0, y: -8 }}

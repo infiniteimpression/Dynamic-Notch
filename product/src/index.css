@@ -82,7 +82,7 @@ button {
    exists to fix.
    ───────────────────────────────────────────────────────────────────────────── */
 :root {
-  --mica-alpha: 0.92;
+  --mica-alpha: 1;
 
   /* Corner radius of every Mica shell, likewise a preference (`cornerRadius`) and
      likewise written per window — by `useCornerRadius`. This fallback is the
@@ -129,7 +129,57 @@ button {
    match `accent_color_default()` in `settings.rs` and `DEFAULTS` in
    `useSettings.ts`: it is what paints for the frame or two before the preference
    is read, and what the browser fallback uses. */
+/* Jet — Holm's default. A hardware notch is black glass with nothing behind
+   it, so there is no blur, no grain and no hairline: just #000. Every variable
+   is declared, as the rule above this block requires. */
 :root,
+[data-theme='jet'] {
+  --mica-rgb: 0, 0, 0;
+  --mica-highlight: transparent;
+  --wash: rgba(255, 255, 255, 0.03);
+  --tile: rgba(255, 255, 255, 0.075);
+  --tile-highlight: transparent;
+  --hover: rgba(255, 255, 255, 0.07);
+  --hover-strong: rgba(255, 255, 255, 0.12);
+  --inset: rgba(255, 255, 255, 0.04);
+  --inset-shadow: none;
+  --text-primary: #fff;
+  --text-strong: #fff;
+  --text-body: rgba(255, 255, 255, 0.85);
+  --text-secondary: rgba(255, 255, 255, 0.62);
+  --text-icon: rgba(255, 255, 255, 0.55);
+  --text-muted: rgba(255, 255, 255, 0.4);
+  --divider: rgba(255, 255, 255, 0.07);
+  --divider-strong: rgba(255, 255, 255, 0.12);
+  --dashed: rgba(255, 255, 255, 0.16);
+  --dashed-strong: rgba(255, 255, 255, 0.22);
+  --dot-idle: rgba(255, 255, 255, 0.22);
+  --scrub-track: rgba(255, 255, 255, 0.16);
+  --art-gradient: linear-gradient(135deg, #2a2a2a, #111);
+  --accent: #3ea6ff;
+  --on-accent: #001526;
+  --scrim: rgba(0, 0, 0, 0.7);
+  --shell-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  --pop-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  --noise-opacity: 0;
+  --load-warn: #fbbf24;
+  --danger: #ff5f57;
+}
+
+[data-theme='jet'] .mica {
+  background: #000;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* The notch itself grows out of the top edge: square where it meets the
+   screen, rounded below. Only the notch card — the tray menu and the settings
+   window keep all four corners. */
+[data-theme='jet'] .notch-card {
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+
 [data-theme='crest'] {
   --mica-rgb: 32, 32, 32;
   --mica-highlight: rgba(255, 255, 255, 0.1);

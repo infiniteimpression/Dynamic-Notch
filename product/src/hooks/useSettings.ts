@@ -17,7 +17,7 @@ export type NotchPosition = 'left' | 'center' | 'right'
  * Which palette the app is drawn from. Mirrors `Theme` in Rust, and each id is a
  * `[data-theme='…']` block in `index.css`.
  */
-export type ThemeId = 'crest' | 'glacier' | 'ember' | 'daylight' | 'mono'
+export type ThemeId = 'crest' | 'glacier' | 'ember' | 'daylight' | 'mono' | 'jet'
 
 export interface Settings {
   alwaysOnTop: boolean
@@ -140,13 +140,13 @@ const DEFAULTS: Settings = {
   notifications: true,
   systemAlerts: true,
   muteWindowsBanners: false,
-  backgroundOpacity: 92,
+  backgroundOpacity: 100,
   notchPosition: 'center',
   notchDisplay: null,
   notchAllDisplays: false,
   hotzoneHint: true,
-  theme: 'crest',
-  accentColor: '#7C3AED',
+  theme: 'jet',
+  accentColor: '#3EA6FF',
   // Empty rather than a copy of `MODULES`: that list is the frontend's own and
   // duplicating it here would give the default two places to disagree.
   panels: [],
@@ -198,6 +198,7 @@ export const ACCENT_SWATCHES: { hex: string; name: string }[] = [
  * is what someone is actually choosing between.
  */
 export const THEMES: { id: ThemeId; name: string; tagline: string }[] = [
+  { id: 'jet', name: 'Jet', tagline: 'Pure black, flush with the top of the screen. Holm’s default.' },
   { id: 'crest', name: 'Crest', tagline: 'Near-black Mica, violet accent — the original.' },
   { id: 'glacier', name: 'Glacier', tagline: 'Cool slate and ice. Precise, technical, quiet.' },
   { id: 'ember', name: 'Ember', tagline: 'Warm black and amber. Low, lamplit, unhurried.' },

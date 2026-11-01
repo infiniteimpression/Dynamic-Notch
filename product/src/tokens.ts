@@ -472,7 +472,10 @@ export function scaleDuration(seconds: number, percent: number): number {
 /** Interaction timings from the master spec. */
 export const timing = {
   /** Continuous dwell in hotzone/pill before auto-expanding. */
-  dwellMs: 600,
+  // Holm: 600 in Crest. Nusa opens the moment the cursor arrives, and 600 ms
+  // read as lag; 90 is still enough that a cursor crossing the top edge on its
+  // way to a tab does not throw the card open.
+  dwellMs: 90,
   /** Grace period after the cursor leaves, before stepping down a state. */
   graceMs: 300,
   /**

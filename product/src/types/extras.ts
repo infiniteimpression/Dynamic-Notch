@@ -27,6 +27,7 @@ export interface Extras {
   prayerSchool: number
   fiverrAlerts: boolean
   fiverrSound: boolean
+  jetApplied: boolean
 }
 
 export const EXTRAS_DEFAULTS: Extras = {
@@ -48,6 +49,7 @@ export const EXTRAS_DEFAULTS: Extras = {
   prayerSchool: 1,
   fiverrAlerts: true,
   fiverrSound: true,
+  jetApplied: true,
 }
 
 /** A pop-up reported by `hud.rs`. */

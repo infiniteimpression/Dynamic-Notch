@@ -124,7 +124,7 @@ fn hotzone_hint_default() -> bool {
 /// Deliberately above the design export's 80: at .80 the wallpaper reads straight
 /// through body copy, which is the complaint this preference exists to answer.
 fn background_opacity_default() -> u8 {
-    92
+    100
 }
 
 /// Floor and ceiling for `background_opacity`.
@@ -292,6 +292,8 @@ pub enum Theme {
     Ember,
     Daylight,
     Mono,
+    /// Holm's own: pure black, flush with the top edge, like a hardware notch.
+    Jet,
 }
 
 impl Theme {
@@ -315,6 +317,7 @@ impl Theme {
             Theme::Ember => "#E8934A",
             Theme::Daylight => "#2F6FED",
             Theme::Mono => "#F0F0F0",
+            Theme::Jet => "#3EA6FF",
         }
     }
 }
@@ -324,7 +327,7 @@ impl Theme {
 /// Must agree with the `:root` block in `src/index.css` and with `DEFAULTS` in
 /// `useSettings.ts` — those are what paint before the preference is read.
 fn theme_default() -> Theme {
-    Theme::Crest
+    Theme::Jet
 }
 
 /// The accent, as `#RRGGBB`.
@@ -660,6 +663,11 @@ pub struct Extras {
     pub fiverr_alerts: bool,
     #[serde(default = "yes")]
     pub fiverr_sound: bool,
+    /// Whether this profile has been moved onto the Jet look once. Builds before
+    /// Jet existed saved Crest's theme to disk; this switches them over exactly
+    /// once, so a later choice of another theme is respected.
+    #[serde(default)]
+    pub jet_applied: bool,
 }
 
 impl Default for Extras {
@@ -774,6 +782,14 @@ pub fn load(app: &AppHandle) -> Settings {
     // defaults with nothing said.
     let mut settings: Settings =
         serde_json::from_str(raw.trim_start_matches('\u{feff}')).unwrap_or_default();
+
+    if !settings.extras.jet_applied {
+        settings.extras.jet_applied = true;
+        settings.theme = Theme::Jet;
+        settings.accent_color = Theme::Jet.accent().to_string();
+        settings.background_opacity = 100;
+        let _ = save(app, &settings);
+    }
 
     // Same reasoning as the BOM: a hand-edited `"backgroundOpacity": 0` is a
     // wholly invisible app, and the window that would fix it is invisible too.
