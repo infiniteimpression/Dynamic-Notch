@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import CollapsedPill from './CollapsedPill'
+import HolmPill from './extras/HolmPill'
 import HotzoneHint from './HotzoneHint'
 import ModulePlaceholder from './ModulePlaceholder'
 import NavArrows from './NavArrows'
@@ -390,6 +390,27 @@ export default function NotchShell({
           transform: 'translateX(-50%)',
         }}
       >
+        {/* Nusa's shoulders: two concave corners where the notch meets the top
+            edge, so it reads as grown out of the bezel rather than hung from
+            it. Inside the card's own wrapper, which is shrink-to-fit around
+            the animated card, so they track its width every frame for free.
+            Jet only (see index.css), and not on the thin line. */}
+        <AnimatePresence>
+          {state !== 'hidden' && !(minimal && state === 'peek') && (
+            <motion.div
+              key="ears"
+              aria-hidden
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.12 }}
+              style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 0 }}
+            >
+              <span className="notch-ear l" />
+              <span className="notch-ear r" />
+            </motion.div>
+          )}
+        </AnimatePresence>
         <AnimatePresence>
           {state !== 'hidden' && (
             <motion.div
@@ -400,7 +421,7 @@ export default function NotchShell({
               exit={{ width: peek.width, height: peek.height, opacity: 0, y: -8 }}
               transition={cardSpring}
               style={{
-                borderRadius: minimal && state === 'peek' ? '0 0 6px 6px' : radius.shell,
+                borderRadius: minimal && state === 'peek' ? '0 0 4px 4px' : radius.shell,
                 pointerEvents: 'auto',
                 // The minimal notch is a plain black line, the colour of a
                 // laptop bezel, rather than a sliver of glass.
@@ -484,23 +505,15 @@ export default function NotchShell({
                       ) : isAnnouncing ? (
                         <AnnounceContent announcement={announcement} session={session} />
                       ) : (
-                        <CollapsedPill
-                          session={session}
-                          battery={battery}
-                          // The reading, not the feed: the pill draws the last
-                          // good value and has nothing to say about a fetch
-                          // that failed or is in flight. That is the card's
-                          // job — it is the surface with room to explain
-                          // itself, and a pill that reported a network error
-                          // out of the corner of the eye would be asking for
-                          // attention it cannot then be given.
-                          weather={weather.weather}
-                          timer={timer.timer}
-                          now={timer.now}
-                          width={peek.width}
-                          mood={mood}
-                          minimal={minimal}
-                        />
+                        minimal ? null : (
+                          <HolmPill
+                            session={session}
+                            battery={battery}
+                            timer={timer.timer}
+                            now={timer.now}
+                            mood={mood}
+                          />
+                        )
                       )}
                     </motion.div>
                   </AnimatePresence>

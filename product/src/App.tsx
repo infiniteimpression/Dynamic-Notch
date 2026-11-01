@@ -22,7 +22,7 @@ import { useTimer } from './hooks/useTimer'
 import { useWeather } from './hooks/useWeather'
 import { useWheelCycle } from './hooks/useWheelCycle'
 import { useWindowsNotifications } from './hooks/useWindowsNotifications'
-import { useHud, useMascotMood } from './hooks/useHud'
+import { useForeground, useHud, useMascotMood } from './hooks/useHud'
 import { useWater } from './hooks/useWater'
 import { useTodos } from './hooks/useTodos'
 import { usePrayer } from './hooks/usePrayer'
@@ -95,26 +95,24 @@ export default function App() {
    * is the visible statement that the card and its hit rect are one input, which
    * is the invariant `layout.ts` exists for.
    */
+  // Holm's resting shape: a thin line while an app is in front, the small
+  // pill with the clock on the desktop. Full screen is handled natively — the
+  // window is hidden outright (`hud.rs`).
+  const foreground = useForeground()
+  const shape: 'line' | 'pill' =
+    settings.extras.minimalNotch || (settings.extras.lineOverApps && foreground === 'app') ? 'line' : 'pill'
+
   const metrics = useMemo(
     () => ({
-      pillWidth: settings.notchWidth,
-      // Minimal notch: a 6px line, the hover target a thick bezel can hide.
-      pillHeight: settings.extras.minimalNotch ? 6 : settings.notchHeight,
+      // The pill is Nusa-sized — about 70% of Crest's — and still follows the
+      // width slider. The line is a 76×5 sliver, like a bezel.
+      pillWidth: shape === 'line' ? 76 : Math.round(settings.notchWidth * 0.71),
+      pillHeight: shape === 'line' ? 5 : settings.notchHeight,
       panelScale: settings.panelScale,
     }),
-    [settings.notchWidth, settings.notchHeight, settings.panelScale, settings.extras.minimalNotch],
+    [settings.notchWidth, settings.notchHeight, settings.panelScale, shape],
   )
 
-  // One poll, two consumers: the same banner for arriving Windows notifications,
-  // and the standing list the notifications module draws. Gated on `loaded` as
-  // well as the preference, so a default that is about to be corrected does not
-  // start a poll — and, more to the point, does not put a banner on screen for
-  // someone who turned the feature off.
-  //
-  // The preference reaches the module too, rather than only the banner: it is one
-  // switch for whether the notch reads the notification centre at all, and a list
-  // that kept filling itself after the user said no would be a second, silent
-  // answer to that question. The module says as much when it is off.
   const notificationsEnabled = loaded && settings.notifications
 
   // The feed has to be read before the state machine is built, because the
@@ -449,7 +447,7 @@ export default function App() {
     useCallback((hud) => announce({ kind: 'hud', hud }, 1600), [announce]),
   )
 
-  const mood = useMascotMood(loaded && extras.mascot && !extras.minimalNotch)
+  const mood = useMascotMood(loaded && extras.mascot && shape === 'pill' && foreground === 'desktop')
 
   const water = useWater(
     extras,
@@ -552,7 +550,7 @@ export default function App() {
         hotzoneHint={loaded && settings.hotzoneHint && !settings.alwaysOnTop}
         extraFeeds={extraFeeds}
         mood={mood}
-        minimal={loaded && extras.minimalNotch}
+        minimal={loaded && shape === 'line'}
       />
 
       {menu && <ContextMenu anchor={menu} onClose={closeMenu} />}

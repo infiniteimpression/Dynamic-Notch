@@ -631,6 +631,10 @@ pub struct Extras {
     pub mascot: bool,
     #[serde(default)]
     pub minimal_notch: bool,
+    /// Shrink to a thin line while an app is in front; the pill with the
+    /// clock is for the desktop.
+    #[serde(default = "yes")]
+    pub line_over_apps: bool,
     #[serde(default = "yes")]
     pub hide_in_fullscreen: bool,
     #[serde(default = "yes")]

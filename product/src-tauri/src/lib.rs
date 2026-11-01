@@ -152,6 +152,7 @@ pub fn run() {
             store::read_store,
             store::write_store,
             prayer::get_prayer_times,
+            hud::get_foreground,
         ])
         .on_window_event(|window, event| {
             // A popup menu must close when it loses focus, the same as the native

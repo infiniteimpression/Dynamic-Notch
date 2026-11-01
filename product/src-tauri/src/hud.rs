@@ -29,6 +29,17 @@ pub enum Hud {
     Language { locale: String },
 }
 
+/// What is in front: `"desktop"` (the wallpaper, nothing focused over it) or
+/// `"app"` (any other window). The taskbar, the Start menu and this app's own
+/// windows count as neither and leave the last answer standing, so clicking
+/// the taskbar or the notch itself does not flip the shape back and forth.
+static FOREGROUND: std::sync::Mutex<&'static str> = std::sync::Mutex::new("desktop");
+
+#[tauri::command]
+pub fn get_foreground() -> &'static str {
+    FOREGROUND.lock().map(|g| *g).unwrap_or("desktop")
+}
+
 #[cfg(not(windows))]
 pub fn start(_app: &AppHandle) {}
 
@@ -296,8 +307,33 @@ mod native {
     // --------------------------------------------------------------- loop --
 
     const TICK: Duration = Duration::from_millis(100);
-    /// How long without input before the mascot is allowed to appear.
-    const IDLE_AFTER_MS: u32 = 45_000;
+    /// How long without input before the mascot is allowed to appear — on the
+    /// desktop, where the eyes replace the clock after a short quiet spell.
+    const IDLE_AFTER_MS: u32 = 10_000;
+
+    /// `Some("desktop" | "app")`, or `None` for windows that should not change
+    /// the answer (taskbar, Start, notification flyouts, this app).
+    fn foreground_kind(hwnd: isize) -> Option<&'static str> {
+        if hwnd == 0 {
+            return Some("desktop");
+        }
+        let mut pid = 0u32;
+        unsafe { GetWindowThreadProcessId(hwnd, &mut pid) };
+        if pid == std::process::id() {
+            return None;
+        }
+        match class_name(hwnd).as_str() {
+            "Progman" | "WorkerW" => Some("desktop"),
+            "Shell_TrayWnd"
+            | "Shell_SecondaryTrayWnd"
+            | "Windows.UI.Core.CoreWindow"
+            | "XamlExplorerHostIslandWindow"
+            | "TopLevelWindowForOverflowXamlIsland"
+            | "NotifyIconOverflowWindow"
+            | "" => None,
+            _ => Some("app"),
+        }
+    }
 
     pub fn start(app: AppHandle) {
         std::thread::spawn(move || run(app));
@@ -314,6 +350,11 @@ mod native {
         let mut speaker = endpoint();
         let mut vol = speaker.as_ref().and_then(volume);
         let mut idle = false;
+        let mut kind: &'static str = foreground_kind(fg).unwrap_or("desktop");
+        if let Ok(mut g) = super::FOREGROUND.lock() {
+            *g = kind;
+        }
+        let _ = app.emit("foreground", kind);
         let mut hidden_by_us: HashSet<String> = HashSet::new();
 
         let mut last_endpoint = Instant::now();
@@ -338,6 +379,17 @@ mod native {
                         locale: locale_name(now_lang),
                     },
                 );
+            }
+            if now_fg != fg {
+                if let Some(next) = foreground_kind(now_fg) {
+                    if next != kind {
+                        kind = next;
+                        if let Ok(mut g) = super::FOREGROUND.lock() {
+                            *g = kind;
+                        }
+                        let _ = app.emit("foreground", kind);
+                    }
+                }
             }
             fg = now_fg;
             lang = now_lang;

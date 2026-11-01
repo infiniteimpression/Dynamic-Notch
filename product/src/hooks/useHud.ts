@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 import type { Extras, HudEvent } from '../types/extras'
 
@@ -31,15 +32,31 @@ export function useHud(extras: Extras, enabled: boolean, onHud: (hud: HudEvent) 
   }, [enabled])
 }
 
-export type MascotMood = 'awake' | 'drowsy' | 'asleep' | 'waving'
+export type Foreground = 'desktop' | 'app'
+
+/** What is in front, from `hud.rs`. The desktop until told otherwise. */
+export function useForeground(): Foreground {
+  const [kind, setKind] = useState<Foreground>('desktop')
+  useEffect(() => {
+    if (!('__TAURI_INTERNALS__' in window)) return
+    void invoke<Foreground>('get_foreground').then(setKind).catch(() => {})
+    const pending = listen<Foreground>('foreground', (event) => setKind(event.payload))
+    return () => void pending.then((unlisten) => unlisten())
+  }, [])
+  return kind
+}
+
+export type MascotMood = 'awake' | 'looking' | 'drowsy' | 'asleep' | 'waving'
 
 /**
  * The mascot's mood, from "is anyone at the keyboard".
  *
- * `hud.rs` reports idle after 45 s without input. The eyes then go drowsy, and
- * after another minute asleep; any input brings them back with a wave that
- * lasts a moment and then settles to awake — where the pill shows the clock
- * again, because the mascot is for an empty desk, not for someone working.
+ * `hud.rs` reports idle after 10 s without input. The eyes then appear in
+ * place of the clock and look around; a minute later they get drowsy, and two
+ * minutes after that they fall asleep. Any input brings a wave, then the clock.
+ *
+ * Only enabled while the desktop is in front — over an app the notch is a line
+ * and has nowhere to draw them.
  */
 export function useMascotMood(enabled: boolean): MascotMood {
   const [mood, setMood] = useState<MascotMood>('awake')
@@ -58,8 +75,9 @@ export function useMascotMood(enabled: boolean): MascotMood {
     const pending = listen<boolean>('user-idle', (event) => {
       clear()
       if (event.payload) {
-        setMood('drowsy')
-        timers.current.push(window.setTimeout(() => setMood('asleep'), 60_000))
+        setMood('looking')
+        timers.current.push(window.setTimeout(() => setMood('drowsy'), 60_000))
+        timers.current.push(window.setTimeout(() => setMood('asleep'), 180_000))
       } else {
         setMood((current) => (current === 'awake' ? 'awake' : 'waving'))
         timers.current.push(window.setTimeout(() => setMood('awake'), 2400))

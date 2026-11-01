@@ -1712,18 +1712,26 @@ function ExtrasPane({ api }: { api: ReturnType<typeof useSettings> }) {
       <h3 style={{ ...sectionLabel, margin: '0 0 8px' }}>Notch</h3>
       <SettingRow
         title="Mascot"
-        body="When your PC has been quiet for a while, the clock steps aside and a pair of eyes appears. They doze off, and wave hello when you come back."
+        body="On the desktop, after a few quiet seconds the clock steps aside and a pair of eyes looks around. They doze off if you stay away, and wave hello when you come back."
         on={x.mascot}
         onToggle={() => setExtras({ mascot: !x.mascot })}
         disabled={x.minimalNotch}
         icon={<Icon><circle cx="9" cy="12" r="1.6" fill="currentColor" /><circle cx="15" cy="12" r="1.6" fill="currentColor" /><rect x="3.5" y="6" width="17" height="12" rx="6" /></Icon>}
       />
       <SettingRow
-        title="Minimal notch"
-        body="For laptops with a thick top bezel: the resting notch becomes a thin black line. Hovering, pop-ups and every card still work as usual."
+        title="Always a thin line"
+        body="Keeps the resting notch a thin black line everywhere, the desktop included — for laptops with a thick top bezel. Hovering, pop-ups and every card still work as usual."
         on={x.minimalNotch}
         onToggle={() => setExtras({ minimalNotch: !x.minimalNotch })}
         icon={<Icon><path d="M5 6h14" strokeWidth={3} /><rect x="3" y="4" width="18" height="15" rx="2" /></Icon>}
+      />
+      <SettingRow
+        title="Thin line over apps"
+        body="While a browser or any other app is in front, the notch shrinks to a thin black line so it never covers what you're doing. On the desktop it's the small pill with the time."
+        on={x.lineOverApps}
+        onToggle={() => setExtras({ lineOverApps: !x.lineOverApps })}
+        disabled={x.minimalNotch}
+        icon={<Icon><path d="M9 5h6" strokeWidth={3} /><rect x="3" y="4" width="18" height="15" rx="2" /><path d="M7 10h10M7 13.5h6" /></Icon>}
       />
       <SettingRow
         title="Hide in full screen"

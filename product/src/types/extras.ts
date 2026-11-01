@@ -9,6 +9,7 @@
 export interface Extras {
   mascot: boolean
   minimalNotch: boolean
+  lineOverApps: boolean
   hideInFullscreen: boolean
   hudVolume: boolean
   hudBrightness: boolean
@@ -33,6 +34,7 @@ export interface Extras {
 export const EXTRAS_DEFAULTS: Extras = {
   mascot: true,
   minimalNotch: false,
+  lineOverApps: true,
   hideInFullscreen: true,
   hudVolume: true,
   hudBrightness: true,

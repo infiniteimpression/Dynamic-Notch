@@ -175,6 +175,29 @@ button {
 /* The notch itself grows out of the top edge: square where it meets the
    screen, rounded below. Only the notch card — the tray menu and the settings
    window keep all four corners. */
+.notch-ear {
+  display: none;
+}
+
+[data-theme='jet'] .notch-ear {
+  display: block;
+  position: absolute;
+  top: 0;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+}
+
+[data-theme='jet'] .notch-ear.l {
+  left: -10px;
+  background: radial-gradient(circle at 0 100%, transparent 9.5px, #000 10px);
+}
+
+[data-theme='jet'] .notch-ear.r {
+  right: -10px;
+  background: radial-gradient(circle at 100% 100%, transparent 9.5px, #000 10px);
+}
+
 [data-theme='jet'] .notch-card {
   border-top-left-radius: 0 !important;
   border-top-right-radius: 0 !important;

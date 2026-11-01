@@ -15,13 +15,17 @@ import type { MascotMood } from '../../hooks/useHud'
  */
 export default function MascotEyes({ mood }: { mood: Exclude<MascotMood, 'awake'> }) {
   const still = useReducedMotion() ?? false
-  const blink = useBlink(mood === 'drowsy' && !still)
+  const blink = useBlink((mood === 'drowsy' || mood === 'looking') && !still)
+  const gaze = useGaze(mood === 'looking' && !still)
 
-  const lid = mood === 'asleep' ? 0.14 : mood === 'drowsy' ? (blink ? 0.1 : 0.5) : 1
+  const lid =
+    mood === 'asleep' ? 0.14 : mood === 'drowsy' ? (blink ? 0.1 : 0.5) : blink ? 0.12 : 1
 
   return (
     <div
-      aria-label={mood === 'asleep' ? 'Sleeping' : mood === 'waving' ? 'Hello again' : 'Getting sleepy'}
+      aria-label={
+        mood === 'asleep' ? 'Sleeping' : mood === 'waving' ? 'Hello again' : mood === 'looking' ? 'Looking around' : 'Getting sleepy'
+      }
       role="img"
       style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 9, height: 20 }}
     >
@@ -42,8 +46,11 @@ export default function MascotEyes({ mood }: { mood: Exclude<MascotMood, 'awake'
           <motion.span
             key={`eye-${i}`}
             initial={false}
-            animate={{ scaleY: lid }}
-            transition={{ type: 'spring', stiffness: 420, damping: 26 }}
+            animate={{ scaleY: lid, x: gaze }}
+            transition={{
+              scaleY: { type: 'spring', stiffness: 520, damping: 28 },
+              x: { type: 'spring', stiffness: 160, damping: 18 },
+            }}
             style={{
               width: 7,
               height: 13,
@@ -103,7 +110,24 @@ function Zs() {
   )
 }
 
-/** A slow, irregular blink while drowsy. */
+/** Where the eyes are looking, in px: a glance left or right now and then. */
+function useGaze(active: boolean) {
+  const [x, setX] = useState(0)
+  useEffect(() => {
+    if (!active) {
+      setX(0)
+      return
+    }
+    const id = window.setInterval(() => {
+      const r = Math.random()
+      setX(r < 0.35 ? -2.5 : r < 0.7 ? 2.5 : 0)
+    }, 2600)
+    return () => window.clearInterval(id)
+  }, [active])
+  return x
+}
+
+/** A slow, irregular blink. */
 function useBlink(active: boolean) {
   const [closed, setClosed] = useState(false)
   useEffect(() => {
