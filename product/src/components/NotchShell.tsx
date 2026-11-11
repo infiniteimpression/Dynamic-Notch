@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import HolmPill from './extras/HolmPill'
 import HotzoneHint from './HotzoneHint'
@@ -46,7 +47,7 @@ import {
   type NotchMetrics,
   type NotificationsFit,
 } from '../layout'
-import { radius, scaleDuration, scaleSpring, spring } from '../tokens'
+import { color, radius, scaleDuration, scaleSpring, spring } from '../tokens'
 import type { Announcement, NotchModule, NotchState } from '../types/notch'
 import type { Performance } from '../types/perf'
 import type { BatteryStatus } from '../types/system'
@@ -123,6 +124,8 @@ interface Props {
   mood: MascotMood
   /** The minimal-notch preference: the resting pill is a thin black line. */
   minimal: boolean
+  /** Opens the settings window (the gear in the nav strip). */
+  onOpenSettings: () => void
 }
 
 export interface ExtraFeeds {
@@ -338,6 +341,7 @@ export default function NotchShell({
   extraFeeds,
   mood,
   minimal,
+  onOpenSettings,
 }: Props) {
   // The same call the state machine makes, with the same metrics and the same fit
   // — the card that is drawn and the rect that is hit-tested are one function of
@@ -468,6 +472,7 @@ export default function NotchShell({
                       weather={weather.weather?.current ?? null}
                       timer={timer.timer}
                       now={timer.now}
+                      onSettings={onOpenSettings}
                     />
                   </div>
                 )}
@@ -479,6 +484,12 @@ export default function NotchShell({
                     what lets both occupy the box at once, and .mica clips the
                     outgoing panel while the card springs to its new size. */}
                 <div style={{ flex: 1, minHeight: 0, position: 'relative' }}>
+                  {isExpanded && modules.length > 1 && (
+                    <>
+                      <EdgeNav side="left" onClick={onPreviousModule} />
+                      <EdgeNav side="right" onClick={onNextModule} />
+                    </>
+                  )}
                   <AnimatePresence initial={false}>
                     <motion.div
                       key={surface}
@@ -528,5 +539,48 @@ export default function NotchShell({
         </AnimatePresence>
       </div>
     </div>
+  )
+}
+
+/**
+ * Holm: a tall click zone down each side of an open card — click anywhere
+ * along the edge to go to the previous or next card. The chevron sits in the
+ * middle, faint until the cursor is on the zone. 18px wide, which is the
+ * card's own side padding, so it covers no buttons.
+ *
+ * Drawn after the panels so it is on top of them, and outside the panel
+ * cross-fade so it never moves when the card changes.
+ */
+function EdgeNav({ side, onClick }: { side: 'left' | 'right'; onClick: () => void }) {
+  const [hover, setHover] = useState(false)
+  return (
+    <button
+      type="button"
+      aria-label={side === 'left' ? 'Previous card' : 'Next card'}
+      onClick={onClick}
+      onPointerEnter={() => setHover(true)}
+      onPointerLeave={() => setHover(false)}
+      style={{
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        [side]: 0,
+        width: 18,
+        zIndex: 5,
+        display: 'grid',
+        placeItems: 'center',
+        padding: 0,
+        background: hover
+          ? `linear-gradient(to ${side === 'left' ? 'right' : 'left'}, ${color.hover}, transparent)`
+          : 'transparent',
+        color: hover ? color.text.primary : color.text.muted,
+        transition: 'color 140ms ease',
+        cursor: 'pointer',
+      }}
+    >
+      <svg viewBox="0 0 24 24" width={16} height={22} fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+        {side === 'left' ? <path d="M15 5l-7 7 7 7" /> : <path d="M9 5l7 7-7 7" />}
+      </svg>
+    </button>
   )
 }

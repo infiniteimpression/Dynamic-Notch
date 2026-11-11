@@ -90,6 +90,8 @@ interface Props {
   timer: TimerState
   /** The clock, from `useTimer`. See `TimerFeed.now`. */
   now: number
+  /** Holm: opens the settings window. */
+  onSettings?: () => void
 }
 
 /*
@@ -174,13 +176,19 @@ export default function NavArrows({
   weather,
   timer,
   now,
+  onSettings,
 }: Props) {
+  // Holm moved the chevrons to the card's edges (`EdgeNav` in NotchShell):
+  // here they sat either side of the name, so they slid whenever the name
+  // changed length, and at 20px they were a small target.
+  void onPrev
+  void onNext
   const badge = battery !== null && battery.percent !== null
   const hasTimer = phaseOf(timer) !== 'idle'
   // The arrows say nothing useful with one card in the ring: there is nowhere to
   // go, and a pair of chevrons that return you to where you are is a control that
   // lies. The label keeps the centre either way, because the strip is a grid.
-  const single = modules.length <= 1
+  void modules
 
   return (
     // Three columns, with the outer two an equal `1fr`.
@@ -224,11 +232,6 @@ export default function NavArrows({
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
         {/* A spacer of the chevron's own size when there is nowhere to go, so the
             name stays on the centre line instead of sliding 20px left. */}
-        {single ? (
-          <span aria-hidden style={{ width: 20, flex: 'none' }} />
-        ) : (
-          <Chevron direction="left" label="Previous panel" onClick={onPrev} />
-        )}
 
         <span
           style={{
@@ -241,12 +244,6 @@ export default function NavArrows({
         >
           {MODULE_LABELS[active]}
         </span>
-
-        {single ? (
-          <span aria-hidden style={{ width: 20, flex: 'none' }} />
-        ) : (
-          <Chevron direction="right" label="Next panel" onClick={onNext} />
-        )}
       </div>
 
       {/* Nothing at all on a machine without a battery, and the grid needs no
@@ -256,9 +253,41 @@ export default function NavArrows({
           Same chip as the temperature opposite, which is the whole of the
           redesign here: one shape, one height, one material, differing only in
           the fill each has something to say with. */}
-      <span style={{ display: 'flex', justifyContent: 'flex-end', minWidth: 0 }}>
+      <span style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 6, minWidth: 0 }}>
         {badge && <BatteryBadge battery={battery} chip={CHIP} />}
+        {onSettings && <Gear onClick={onSettings} />}
       </span>
     </div>
+  )
+}
+
+/** Opens Holm's settings window from any card. */
+function Gear({ onClick }: { onClick: () => void }) {
+  const [hover, setHover] = useState(false)
+  return (
+    <button
+      type="button"
+      aria-label="Holm settings"
+      title="Settings"
+      onClick={onClick}
+      onPointerEnter={() => setHover(true)}
+      onPointerLeave={() => setHover(false)}
+      style={{
+        width: 20,
+        height: 20,
+        flex: 'none',
+        display: 'grid',
+        placeItems: 'center',
+        borderRadius: 6,
+        background: hover ? color.hover : 'transparent',
+        color: hover ? color.accent : color.text.muted,
+        transition: 'background 140ms ease, color 140ms ease',
+      }}
+    >
+      <svg viewBox="0 0 24 24" width={14} height={14} fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
+      </svg>
+    </button>
   )
 }

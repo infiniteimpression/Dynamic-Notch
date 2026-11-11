@@ -12,6 +12,8 @@ export interface Extras {
   lineOverApps: boolean
   /** Opened cards and banners, as a percentage of their designed size. */
   cardScale: number
+  /** How long the cursor rests on the notch before it opens, in ms. */
+  openDelayMs: number
   hideInFullscreen: boolean
   hudVolume: boolean
   hudBrightness: boolean
@@ -37,7 +39,8 @@ export const EXTRAS_DEFAULTS: Extras = {
   mascot: true,
   minimalNotch: false,
   lineOverApps: true,
-  cardScale: 80,
+  cardScale: 95,
+  openDelayMs: 90,
   hideInFullscreen: true,
   hudVolume: true,
   hudBrightness: true,

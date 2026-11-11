@@ -15,12 +15,50 @@
 
 use std::str::FromStr;
 use tauri::{AppHandle, Emitter};
-use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
+use std::sync::atomic::{AtomicBool, Ordering};
+use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Shortcut, ShortcutState};
 
 /// Broadcast when the shortcut fires. Every notch window listens — with mirroring
 /// on, the point of the shortcut is to put the notch in front of you, and which
 /// screen "you" are looking at is not something this can know.
 pub const TOGGLE_EVENT: &str = "hotkey-toggle";
+
+/// Holm: ← and → switch cards while the cursor is on an open card.
+///
+/// The notch never takes focus (that is the click-through design), so a
+/// webview key listener would only hear keys after a click. These are
+/// registered system-wide instead, but only while the cursor is on an open card
+/// and no field has a caret — the frontend turns them on and off on exactly
+/// those edges — so the arrows go back to every other app the moment the
+/// cursor leaves.
+pub const NAV_EVENT: &str = "nav-key";
+static NAV_ON: AtomicBool = AtomicBool::new(false);
+
+fn nav_shortcuts() -> [Shortcut; 2] {
+    [Shortcut::new(None, Code::ArrowLeft), Shortcut::new(None, Code::ArrowRight)]
+}
+
+fn register_nav(app: &AppHandle) {
+    let manager = app.global_shortcut();
+    for shortcut in nav_shortcuts() {
+        if !manager.is_registered(shortcut) {
+            let _ = manager.register(shortcut);
+        }
+    }
+}
+
+#[tauri::command]
+pub fn set_nav_keys(app: AppHandle, on: bool) {
+    NAV_ON.store(on, Ordering::SeqCst);
+    if on {
+        register_nav(&app);
+    } else {
+        let manager = app.global_shortcut();
+        for shortcut in nav_shortcuts() {
+            let _ = manager.unregister(shortcut);
+        }
+    }
+}
 
 /// Parse an accelerator, and refuse the ones that would take a key away from
 /// every other app on the machine.
@@ -57,6 +95,10 @@ pub fn parse(accelerator: &str) -> Result<Shortcut, String> {
 pub fn apply(app: &AppHandle, accelerator: Option<&str>) -> Result<(), String> {
     let manager = app.global_shortcut();
     let _ = manager.unregister_all();
+    // `unregister_all` takes the arrows too; put them back if a card has them.
+    if NAV_ON.load(Ordering::SeqCst) {
+        register_nav(app);
+    }
 
     let Some(accelerator) = accelerator else {
         return Ok(());
@@ -74,8 +116,15 @@ pub fn apply(app: &AppHandle, accelerator: Option<&str>) -> Result<(), String> {
 /// open the notch and close it again inside the same keystroke.
 pub fn plugin<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
     tauri_plugin_global_shortcut::Builder::new()
-        .with_handler(|app, _shortcut, event| {
-            if event.state() == ShortcutState::Pressed {
+        .with_handler(|app, shortcut, event| {
+            if event.state() != ShortcutState::Pressed {
+                return;
+            }
+            if shortcut.mods.is_empty() && shortcut.key == Code::ArrowLeft {
+                let _ = app.emit(NAV_EVENT, "left");
+            } else if shortcut.mods.is_empty() && shortcut.key == Code::ArrowRight {
+                let _ = app.emit(NAV_EVENT, "right");
+            } else {
                 let _ = app.emit(TOGGLE_EVENT, ());
             }
         })

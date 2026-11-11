@@ -59,6 +59,7 @@ export function useNotchState({
   modules = MODULES,
   metrics = DEFAULT_METRICS,
   graceMs = timing.graceMs,
+  dwellMs = timing.dwellMs,
 }: {
   alwaysVisible?: boolean
   /**
@@ -97,6 +98,8 @@ export function useNotchState({
    * taste, and is the one users actually complain about in both directions.
    */
   graceMs?: number
+  /** Holm: how long the cursor rests before the notch opens. A preference. */
+  dwellMs?: number
 } = {}) {
   const [state, setState] = useState<NotchState>('hidden')
   const [activeModule, setActiveModule] = useState<NotchModule>(() => modules[0] ?? 'media')
@@ -398,7 +401,7 @@ export function useNotchState({
           dwellRef.current = setTimeout(() => {
             dwellRef.current = null
             setState('expanded')
-          }, timing.dwellMs)
+          }, dwellMs)
         }
         return
       }
@@ -432,7 +435,7 @@ export function useNotchState({
     // down rather than on the next relaunch — it is adjusted from a slider, and a
     // preference you have to restart for is one the user cannot feel themselves
     // choosing.
-  }, [inside, state, resting, pinned, typing, unpin, graceMs])
+  }, [inside, state, resting, pinned, typing, unpin, graceMs, dwellMs])
 
   // Switching the preference on should put the pill up straight away rather than
   // wait for the next hover. The opposite direction needs nothing: the effect
@@ -687,5 +690,9 @@ export function useNotchState({
     announce,
     nextModule,
     previousModule,
+    /** Holm: the cursor is on the notch — gates the ← → keys. */
+    inside,
+    /** Holm: a field has a caret — the arrows belong to it then. */
+    typing,
   }
 }

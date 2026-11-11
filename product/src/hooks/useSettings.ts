@@ -242,7 +242,7 @@ export const NOTCH_WIDTH = { min: 240, max: 460, step: 4 } as const
 export const NOTCH_HEIGHT = { min: 26, max: 56, step: 2 } as const
 export const CORNER_RADIUS = { min: 0, max: 28, step: 1 } as const
 export const ANIMATION_SPEED = { min: 50, max: 200, step: 10 } as const
-export const PANEL_SCALE = { min: 85, max: 115, step: 5 } as const
+export const PANEL_SCALE = { min: 70, max: 150, step: 5 } as const
 export const COLLAPSE_DELAY = { min: 100, max: 2000, step: 50 } as const
 
 /**

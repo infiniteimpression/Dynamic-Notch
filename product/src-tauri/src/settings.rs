@@ -205,8 +205,8 @@ const ANIMATION_MAX: u8 = 200;
 /// slider does, and the narrower cards keep going. That is the right way round —
 /// the alternative is a range chosen for the widest card that barely moves the
 /// others.
-const PANEL_SCALE_MIN: u8 = 85;
-const PANEL_SCALE_MAX: u8 = 115;
+const PANEL_SCALE_MIN: u8 = 70;
+const PANEL_SCALE_MAX: u8 = 150;
 
 /// How long the notch waits after the cursor leaves before it steps down, in ms.
 ///
@@ -616,8 +616,11 @@ fn water_every_default() -> u32 {
     60
 }
 fn card_scale_default() -> u32 {
-    // Crest's cards drawn at 80%: closer to Nusa's size, still readable.
-    80
+    // Text size. 80 shipped first and read as too small.
+    95
+}
+fn open_delay_default() -> u32 {
+    90
 }
 fn prayer_method_default() -> u32 {
     // University of Islamic Sciences, Karachi.
@@ -642,6 +645,9 @@ pub struct Extras {
     /// Opened cards and banners, as a percentage of their designed size.
     #[serde(default = "card_scale_default")]
     pub card_scale: u32,
+    /// How long the cursor rests on the notch before it opens, in ms.
+    #[serde(default = "open_delay_default")]
+    pub open_delay_ms: u32,
     #[serde(default = "yes")]
     pub hide_in_fullscreen: bool,
     #[serde(default = "yes")]
@@ -1799,7 +1805,9 @@ pub fn set_extras(
     extras.water_end_hour = extras.water_end_hour.clamp(extras.water_start_hour + 1, 24);
     extras.water_every_min = extras.water_every_min.clamp(15, 240);
     extras.prayer_school = extras.prayer_school.min(1);
-    extras.card_scale = extras.card_scale.clamp(60, 100);
+    // 120 is the most the tallest card (346) can grow inside the 420 window.
+    extras.card_scale = extras.card_scale.clamp(60, 120);
+    extras.open_delay_ms = extras.open_delay_ms.min(600);
 
     let mut settings = current.get(&app);
     settings.extras = extras.clone();

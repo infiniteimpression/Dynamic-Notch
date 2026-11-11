@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { listen } from '@tauri-apps/api/event'
+import { invoke } from '@tauri-apps/api/core'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import ContextMenu, { type MenuAnchor } from './components/ContextMenu'
 import NotchShell from './components/NotchShell'
@@ -185,6 +186,8 @@ export default function App() {
     announce,
     nextModule,
     previousModule,
+    inside,
+    typing,
   } = useNotchState({
     // Gated on `loaded` so the default never shows a pill it is about to retract.
     alwaysVisible: loaded && settings.alwaysOnTop,
@@ -195,8 +198,46 @@ export default function App() {
     // file lands is acting on what the notch would have drawn anyway.
     metrics,
     graceMs: settings.collapseDelay,
+    dwellMs: settings.extras.openDelayMs,
   })
   announceRef.current = announce
+
+  // Holm: ← → switch cards while the cursor is on an open card. Registered
+  // with Windows only on that edge (see `hotkey.rs`), so the arrows belong to
+  // every other app the rest of the time, and to a text field with a caret.
+  const navKeys = state === 'expanded' && inside && !typing && panels.visible.length > 1
+  useEffect(() => {
+    if (!('__TAURI_INTERNALS__' in window)) return
+    void invoke('set_nav_keys', { on: navKeys }).catch(() => {})
+  }, [navKeys])
+  useEffect(() => {
+    if (!('__TAURI_INTERNALS__' in window)) return
+    const pending = listen<'left' | 'right'>('nav-key', (event) => {
+      if (event.payload === 'left') previousModule()
+      else nextModule()
+    })
+    return () => {
+      void invoke('set_nav_keys', { on: false }).catch(() => {})
+      void pending.then((unlisten) => unlisten())
+    }
+  }, [previousModule, nextModule])
+  // And the plain DOM keys, for the browser preview and for a card that has
+  // been clicked (the window then has focus and hears keys itself).
+  useEffect(() => {
+    if (state !== 'expanded') return
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return
+      if (event.key === 'ArrowLeft') previousModule()
+      else if (event.key === 'ArrowRight') nextModule()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [state, previousModule, nextModule])
+
+  const openSettings = useCallback(() => {
+    void invoke('settings_open').catch(() => {})
+  }, [])
 
   // Scroll over an open card to move through the ring, alongside the arrows.
   //
@@ -552,6 +593,7 @@ export default function App() {
         extraFeeds={extraFeeds}
         mood={mood}
         minimal={loaded && shape === 'line'}
+        onOpenSettings={openSettings}
       />
 
       {menu && <ContextMenu anchor={menu} onClose={closeMenu} />}

@@ -122,9 +122,20 @@ type Pane =
   | 'notes'
   | 'extras'
   | 'settings'
+  | 'holm'
 
 /** Nav entries, in the order they appear in the sidebar. */
 const PANES: { id: Pane; label: string; icon: ReactNode }[] = [
+  {
+    id: 'holm',
+    label: 'Holm',
+    icon: (
+      <Icon size={16}>
+        <path d="M4 5h16v5a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z" />
+        <path d="M9 19h6" />
+      </Icon>
+    ),
+  },
   {
     id: 'about',
     label: 'About this app',
@@ -210,7 +221,7 @@ const PANES: { id: Pane; label: string; icon: ReactNode }[] = [
   },
   {
     id: 'extras',
-    label: 'Extras',
+    label: 'Features',
     icon: (
       <Icon size={16}>
         <path d="M12 3.5l2.2 5 5.3.5-4 3.6 1.2 5.3L12 15.2l-4.7 2.7 1.2-5.3-4-3.6 5.3-.5z" />
@@ -1698,6 +1709,172 @@ function SettingsPane({ api }: { api: ReturnType<typeof useSettings> }) {
  * switched on and off in Panels like every other card; this pane is how each
  * one behaves.
  */
+/**
+ * Holm's own pane, and the one the window opens on: every control that
+ * changes how big the notch is and how it behaves, in one place, with links to
+ * everything else. Several of these also live in Appearance, where Crest put
+ * them; they are the same preferences, so changing one moves the other.
+ */
+function HolmPane({ api, onGo }: { api: ReturnType<typeof useSettings>; onGo: (pane: Pane) => void }) {
+  const {
+    settings,
+    setExtras,
+    setPanelScale,
+    setNotchWidth,
+    setNotchHeight,
+    setCornerRadius,
+    setAnimationSpeed,
+    setCollapseDelay,
+  } = api
+  const x = settings.extras
+  const ms = (v: number) => (v < 1000 ? `${v} ms` : `${(v / 1000).toFixed(1)} s`)
+
+  return (
+    <>
+      <h3 style={{ ...sectionLabel, margin: '0 0 8px' }}>Size and text</h3>
+      <LiveRange
+        title="Text size"
+        body="How big everything inside the open notch and its pop-ups is drawn — text, icons and buttons together. The card grows or shrinks to fit."
+        icon={<Icon><path d="M4 18L9 6l5 12M5.8 14h6.4M15 18l2.8-7 2.7 7M15.9 16h3.8" /></Icon>}
+        value={x.cardScale}
+        bounds={{ min: 60, max: 120, step: 5 }}
+        format={(v) => `${v}%`}
+        onCommit={(v) => setExtras({ cardScale: v })}
+      />
+      <LiveRange
+        title="Card width"
+        body="How wide the open notch is, independent of the text. Wider gives everything more room; narrower is less in the way."
+        icon={<Icon><rect x="6" y="5" width="12" height="14" rx="2.5" /><path d="M3 8v8M21 8v8M3 12h2M19 12h2" /></Icon>}
+        value={settings.panelScale}
+        bounds={PANEL_SCALE}
+        format={(v) => `${v}%`}
+        onCommit={setPanelScale}
+      />
+      <LiveRange
+        title="Resting pill width"
+        body="How wide the small pill with the clock is on the desktop."
+        icon={<Icon><rect x="2.5" y="9" width="19" height="6" rx="3" /><path d="M2.5 5h19" /></Icon>}
+        value={settings.notchWidth}
+        bounds={NOTCH_WIDTH}
+        format={(v) => `${Math.round(v * 0.71)} px`}
+        onCommit={setNotchWidth}
+      />
+      <LiveRange
+        title="Resting pill height"
+        body="How tall that pill is."
+        icon={<Icon><rect x="7" y="6" width="10" height="12" rx="4" /><path d="M4 6v12" /></Icon>}
+        value={settings.notchHeight}
+        bounds={NOTCH_HEIGHT}
+        format={(v) => `${v} px`}
+        onCommit={setNotchHeight}
+      />
+      <LiveRange
+        title="Corner roundness"
+        body="How rounded the notch's bottom corners are."
+        icon={<Icon><path d="M4 20V10a6 6 0 0 1 6-6h10" /></Icon>}
+        value={settings.cornerRadius}
+        bounds={CORNER_RADIUS}
+        format={(v) => `${v} px`}
+        onCommit={setCornerRadius}
+      />
+
+      <h3 style={{ ...sectionLabel, margin: '18px 0 8px' }}>Behaviour</h3>
+      <LiveRange
+        title="Opening delay"
+        body="How long your mouse rests on the notch before it opens. Zero opens instantly; a little delay stops it opening when you only pass by on the way to a browser tab."
+        icon={<Icon><path d="M12 3v3M12 18v3M5 12H2M22 12h-3" /><circle cx="12" cy="12" r="4" /></Icon>}
+        value={x.openDelayMs}
+        bounds={{ min: 0, max: 600, step: 10 }}
+        format={ms}
+        onCommit={(v) => setExtras({ openDelayMs: v })}
+      />
+      <LiveRange
+        title="Closing delay"
+        body="How long the notch stays open after your mouse leaves it."
+        icon={<Icon><circle cx="12" cy="13" r="8" /><path d="M12 9v4l2.5 2M9 2h6" /></Icon>}
+        value={settings.collapseDelay}
+        bounds={COLLAPSE_DELAY}
+        format={ms}
+        onCommit={setCollapseDelay}
+      />
+      <LiveRange
+        title="Animation speed"
+        body="How fast the notch grows, shrinks and switches cards."
+        icon={<Icon><path d="M3 12h5l2-5 3 10 2-5h6" /></Icon>}
+        value={settings.animationSpeed}
+        bounds={ANIMATION_SPEED}
+        format={(v) => `${v}%`}
+        onCommit={setAnimationSpeed}
+      />
+      <SettingRow
+        title="Thin line over apps"
+        body="While a browser or any other app is in front, the notch rests as a thin black line. On the desktop it's the small pill with the time."
+        on={x.lineOverApps}
+        onToggle={() => setExtras({ lineOverApps: !x.lineOverApps })}
+        disabled={x.minimalNotch}
+        icon={<Icon><path d="M9 5h6" strokeWidth={3} /><rect x="3" y="4" width="18" height="15" rx="2" /></Icon>}
+      />
+      <SettingRow
+        title="Always a thin line"
+        body="A thin line everywhere, the desktop included — for laptops with a thick top bezel."
+        on={x.minimalNotch}
+        onToggle={() => setExtras({ minimalNotch: !x.minimalNotch })}
+        icon={<Icon><path d="M5 6h14" strokeWidth={3} /><rect x="3" y="4" width="18" height="15" rx="2" /></Icon>}
+      />
+      <SettingRow
+        title="Hide in full screen"
+        body="Disappears completely for full-screen games, videos and slides, and comes back when you leave them."
+        on={x.hideInFullscreen}
+        onToggle={() => setExtras({ hideInFullscreen: !x.hideInFullscreen })}
+        icon={<Icon><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" /></Icon>}
+      />
+      <SettingRow
+        title="Mascot"
+        body="On the desktop, after 10 quiet seconds the clock gives way to a pair of eyes. They doze off if you stay away and wave when you're back."
+        on={x.mascot}
+        onToggle={() => setExtras({ mascot: !x.mascot })}
+        disabled={x.minimalNotch}
+        icon={<Icon><circle cx="9" cy="12" r="1.6" fill="currentColor" /><circle cx="15" cy="12" r="1.6" fill="currentColor" /><rect x="3.5" y="6" width="17" height="12" rx="6" /></Icon>}
+      />
+      <p style={{ fontSize: 11.5, lineHeight: 1.5, color: color.text.secondary, margin: '10px 2px 0' }}>
+        Switching cards: click the left or right edge of an open card, scroll over it, or press ← and → while your mouse is on it.
+      </p>
+
+      <h3 style={{ ...sectionLabel, margin: '18px 0 8px' }}>Everything else</h3>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+        {(
+          [
+            ['panels', 'Cards', 'Choose and reorder the notch’s cards'],
+            ['weather', 'Weather & location', 'Your city — also used for prayer times'],
+            ['extras', 'Features', 'Pop-ups, water, prayer times, Fiverr'],
+            ['theme', 'Theme', 'Jet black and other colour themes'],
+            ['appearance', 'Appearance', 'Accent colour, transparency, shortcut'],
+            ['display', 'Display', 'Which screen and where on it'],
+            ['notes', 'Notes', 'Read your saved quick notes'],
+            ['settings', 'General', 'Start with Windows, notifications and more'],
+          ] as [Pane, string, string][]
+        ).map(([id, title, body]) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => onGo(id)}
+            className="tile"
+            style={{
+              textAlign: 'left',
+              padding: '10px 12px',
+              borderRadius: radius.tile,
+              background: color.tile,
+            }}
+          >
+            <div style={{ fontSize: 12.5, fontWeight: 600, color: color.text.strong }}>{title}</div>
+            <div style={{ fontSize: 11, marginTop: 2, color: color.text.secondary }}>{body}</div>
+          </button>
+        ))}
+      </div>
+    </>
+  )
+}
+
 function ExtrasPane({ api }: { api: ReturnType<typeof useSettings> }) {
   const { settings, setExtras } = api
   const x = settings.extras
@@ -1709,48 +1886,7 @@ function ExtrasPane({ api }: { api: ReturnType<typeof useSettings> }) {
 
   return (
     <>
-      <h3 style={{ ...sectionLabel, margin: '0 0 8px' }}>Notch</h3>
-      <SettingRow
-        title="Mascot"
-        body="On the desktop, after a few quiet seconds the clock steps aside and a pair of eyes looks around. They doze off if you stay away, and wave hello when you come back."
-        on={x.mascot}
-        onToggle={() => setExtras({ mascot: !x.mascot })}
-        disabled={x.minimalNotch}
-        icon={<Icon><circle cx="9" cy="12" r="1.6" fill="currentColor" /><circle cx="15" cy="12" r="1.6" fill="currentColor" /><rect x="3.5" y="6" width="17" height="12" rx="6" /></Icon>}
-      />
-      <SettingRow
-        title="Always a thin line"
-        body="Keeps the resting notch a thin black line everywhere, the desktop included — for laptops with a thick top bezel. Hovering, pop-ups and every card still work as usual."
-        on={x.minimalNotch}
-        onToggle={() => setExtras({ minimalNotch: !x.minimalNotch })}
-        icon={<Icon><path d="M5 6h14" strokeWidth={3} /><rect x="3" y="4" width="18" height="15" rx="2" /></Icon>}
-      />
-      <LiveRange
-        title="Card size"
-        body="How big the notch grows when you hover it, and the pop-ups. Everything shrinks together, text included."
-        icon={<Icon><rect x="4" y="5" width="16" height="11" rx="2" /><path d="M9 19.5h6" /></Icon>}
-        value={x.cardScale}
-        bounds={{ min: 60, max: 100, step: 5 }}
-        format={(v) => `${v}%`}
-        onCommit={(v) => setExtras({ cardScale: v })}
-      />
-      <SettingRow
-        title="Thin line over apps"
-        body="While a browser or any other app is in front, the notch shrinks to a thin black line so it never covers what you're doing. On the desktop it's the small pill with the time."
-        on={x.lineOverApps}
-        onToggle={() => setExtras({ lineOverApps: !x.lineOverApps })}
-        disabled={x.minimalNotch}
-        icon={<Icon><path d="M9 5h6" strokeWidth={3} /><rect x="3" y="4" width="18" height="15" rx="2" /><path d="M7 10h10M7 13.5h6" /></Icon>}
-      />
-      <SettingRow
-        title="Hide in full screen"
-        body="Steps aside for full-screen games, videos and slides on the same screen, and comes back when you leave them."
-        on={x.hideInFullscreen}
-        onToggle={() => setExtras({ hideInFullscreen: !x.hideInFullscreen })}
-        icon={<Icon><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" /></Icon>}
-      />
-
-      <h3 style={{ ...sectionLabel, margin: '18px 0 8px' }}>Pop-ups</h3>
+      <h3 style={{ ...sectionLabel, margin: '0 0 8px' }}>Pop-ups</h3>
       <SettingRow
         title="Volume"
         body="A clean overlay with a level bar when the volume changes or you mute."
@@ -1883,7 +2019,7 @@ function ExtrasPane({ api }: { api: ReturnType<typeof useSettings> }) {
 }
 
 export default function SettingsWindow() {
-  const [pane, setPane] = useState<Pane>('about')
+  const [pane, setPane] = useState<Pane>('holm')
   const [version, setVersion] = useState('')
   const [closeHovered, setCloseHovered] = useState(false)
   const body = useRef<HTMLDivElement>(null)
@@ -2115,7 +2251,9 @@ export default function SettingsWindow() {
                   exit={{ opacity: 0, x: -6 }}
                   transition={{ duration: 0.14, ease: 'easeOut' }}
                 >
-                  {pane === 'about' ? (
+                  {pane === 'holm' ? (
+                    <HolmPane api={api} onGo={setPane} />
+                  ) : pane === 'about' ? (
                     <AboutPane version={version} />
                   ) : pane === 'panels' ? (
                     <PanelsPane api={api} />
