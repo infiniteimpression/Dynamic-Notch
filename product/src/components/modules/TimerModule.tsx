@@ -552,14 +552,10 @@ function RunningControls({
         gap: 6,
       }}
     >
-      {/* A paused timer shows its controls unconditionally. Paused is a state the
-          user has to be able to get *out* of, and hiding the way out behind a
-          hover on a card that looks stopped is how a timer gets abandoned. */}
-      <motion.div
-        animate={{ opacity: hover || paused ? 1 : 0 }}
-        transition={{ duration: fade }}
-        style={{ display: 'flex', alignItems: 'center', gap: 6 }}
-      >
+      {/* Holm: always visible. Crest revealed these only while the cursor was
+          over this band, so a running timer read as a card with no way to stop
+          it — the controls were there, and nobody could see them. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         {paused ? (
           <Action label="Resume" primary onClick={onResume}>
             <Glyph path="M8 5.5v13l11-6.5z" fill />
@@ -570,10 +566,10 @@ function RunningControls({
           </Action>
         )}
 
-        <Action label="Reset" onClick={onReset}>
-          <Glyph path="M4.5 9.5a8 8 0 1 1 .6 5M4.5 4.8v4.7h4.7" />
+        <Action label="Stop" onClick={onReset}>
+          <Glyph path="M7 7h10v10H7z" fill />
         </Action>
-      </motion.div>
+      </div>
     </motion.div>
   )
 }

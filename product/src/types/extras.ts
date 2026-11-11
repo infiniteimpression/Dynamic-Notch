@@ -10,6 +10,8 @@ export interface Extras {
   mascot: boolean
   minimalNotch: boolean
   lineOverApps: boolean
+  /** Opened cards and banners, as a percentage of their designed size. */
+  cardScale: number
   hideInFullscreen: boolean
   hudVolume: boolean
   hudBrightness: boolean
@@ -35,6 +37,7 @@ export const EXTRAS_DEFAULTS: Extras = {
   mascot: true,
   minimalNotch: false,
   lineOverApps: true,
+  cardScale: 80,
   hideInFullscreen: true,
   hudVolume: true,
   hudBrightness: true,

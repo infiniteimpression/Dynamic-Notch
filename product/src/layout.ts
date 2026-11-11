@@ -98,6 +98,14 @@ export interface NotchMetrics {
   pillHeight: number
   /** Expanded card widths, as a percentage of the design's own. 100 = as drawn. */
   panelScale: number
+  /**
+   * Holm: opened cards and banners drawn at this percentage of their designed
+   * size, text and all. The card's content is laid out at full size and drawn
+   * smaller with CSS `zoom` (see `NotchShell`), so no component's pinned
+   * arithmetic changes — and this is the only place the drawn size is scaled,
+   * so the hit rect shrinks with it.
+   */
+  cardScale: number
 }
 
 /** The design export's own geometry — what the notch draws before any preference lands. */
@@ -105,6 +113,7 @@ export const DEFAULT_METRICS: NotchMetrics = {
   pillWidth: size.peek.width,
   pillHeight: size.peek.height,
   panelScale: 100,
+  cardScale: 100,
 }
 
 /**
@@ -135,6 +144,19 @@ export function cardSize(
   state: NotchState,
   module: NotchModule,
   metrics: NotchMetrics = DEFAULT_METRICS,
+  fit?: NotificationsFit,
+) {
+  const design = designSize(state, module, metrics, fit)
+  if (state !== 'expanded' && state !== 'announce') return design
+  const k = metrics.cardScale / 100
+  return { width: Math.round(design.width * k), height: Math.round(design.height * k) }
+}
+
+/** The card at 100%, before `cardScale`. */
+function designSize(
+  state: NotchState,
+  module: NotchModule,
+  metrics: NotchMetrics,
   fit?: NotificationsFit,
 ) {
   if (state === 'expanded') {

@@ -1725,6 +1725,15 @@ function ExtrasPane({ api }: { api: ReturnType<typeof useSettings> }) {
         onToggle={() => setExtras({ minimalNotch: !x.minimalNotch })}
         icon={<Icon><path d="M5 6h14" strokeWidth={3} /><rect x="3" y="4" width="18" height="15" rx="2" /></Icon>}
       />
+      <LiveRange
+        title="Card size"
+        body="How big the notch grows when you hover it, and the pop-ups. Everything shrinks together, text included."
+        icon={<Icon><rect x="4" y="5" width="16" height="11" rx="2" /><path d="M9 19.5h6" /></Icon>}
+        value={x.cardScale}
+        bounds={{ min: 60, max: 100, step: 5 }}
+        format={(v) => `${v}%`}
+        onCommit={(v) => setExtras({ cardScale: v })}
+      />
       <SettingRow
         title="Thin line over apps"
         body="While a browser or any other app is in front, the notch shrinks to a thin black line so it never covers what you're doing. On the desktop it's the small pill with the time."

@@ -615,6 +615,10 @@ fn water_end_default() -> u32 {
 fn water_every_default() -> u32 {
     60
 }
+fn card_scale_default() -> u32 {
+    // Crest's cards drawn at 80%: closer to Nusa's size, still readable.
+    80
+}
 fn prayer_method_default() -> u32 {
     // University of Islamic Sciences, Karachi.
     1
@@ -635,6 +639,9 @@ pub struct Extras {
     /// clock is for the desktop.
     #[serde(default = "yes")]
     pub line_over_apps: bool,
+    /// Opened cards and banners, as a percentage of their designed size.
+    #[serde(default = "card_scale_default")]
+    pub card_scale: u32,
     #[serde(default = "yes")]
     pub hide_in_fullscreen: bool,
     #[serde(default = "yes")]
@@ -1792,6 +1799,7 @@ pub fn set_extras(
     extras.water_end_hour = extras.water_end_hour.clamp(extras.water_start_hour + 1, 24);
     extras.water_every_min = extras.water_every_min.clamp(15, 240);
     extras.prayer_school = extras.prayer_school.min(1);
+    extras.card_scale = extras.card_scale.clamp(60, 100);
 
     let mut settings = current.get(&app);
     settings.extras = extras.clone();

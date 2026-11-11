@@ -443,6 +443,10 @@ export default function NotchShell({
                   height: '100%',
                   display: 'flex',
                   flexDirection: 'column',
+                  // Cards and banners are laid out at their designed size and
+                  // drawn at `cardScale` — see `NotchMetrics.cardScale`. The
+                  // resting pill is sized directly and is never zoomed.
+                  zoom: state === 'expanded' || state === 'announce' ? metrics.cardScale / 100 : 1,
                 }}
               >
                 {isExpanded && (

@@ -109,8 +109,9 @@ export default function App() {
       pillWidth: shape === 'line' ? 76 : Math.round(settings.notchWidth * 0.71),
       pillHeight: shape === 'line' ? 5 : settings.notchHeight,
       panelScale: settings.panelScale,
+      cardScale: settings.extras.cardScale,
     }),
-    [settings.notchWidth, settings.notchHeight, settings.panelScale, shape],
+    [settings.notchWidth, settings.notchHeight, settings.panelScale, settings.extras.cardScale, shape],
   )
 
   const notificationsEnabled = loaded && settings.notifications
