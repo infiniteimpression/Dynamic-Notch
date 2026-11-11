@@ -619,6 +619,9 @@ fn card_scale_default() -> u32 {
     // Text size. 80 shipped first and read as too small.
     95
 }
+fn hundred() -> u32 {
+    100
+}
 fn open_delay_default() -> u32 {
     90
 }
@@ -648,6 +651,9 @@ pub struct Extras {
     /// How long the cursor rests on the notch before it opens, in ms.
     #[serde(default = "open_delay_default")]
     pub open_delay_ms: u32,
+    /// Opened cards' height, as a percentage of their designed height.
+    #[serde(default = "hundred")]
+    pub card_height: u32,
     #[serde(default = "yes")]
     pub hide_in_fullscreen: bool,
     #[serde(default = "yes")]
@@ -1808,6 +1814,7 @@ pub fn set_extras(
     // 120 is the most the tallest card (346) can grow inside the 420 window.
     extras.card_scale = extras.card_scale.clamp(60, 120);
     extras.open_delay_ms = extras.open_delay_ms.min(600);
+    extras.card_height = extras.card_height.clamp(70, 150);
 
     let mut settings = current.get(&app);
     settings.extras = extras.clone();

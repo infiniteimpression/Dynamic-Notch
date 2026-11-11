@@ -1751,6 +1751,15 @@ function HolmPane({ api, onGo }: { api: ReturnType<typeof useSettings>; onGo: (p
         onCommit={setPanelScale}
       />
       <LiveRange
+        title="Card height"
+        body="How tall the open notch is. Above 100% the content sits in the middle with more room around it; below 100% the card is shorter and scrolls."
+        icon={<Icon><rect x="6" y="5" width="12" height="14" rx="2.5" /><path d="M8 2h8M8 22h8M12 2v2M12 20v2" /></Icon>}
+        value={x.cardHeight}
+        bounds={{ min: 70, max: 150, step: 5 }}
+        format={(v) => `${v}%`}
+        onCommit={(v) => setExtras({ cardHeight: v })}
+      />
+      <LiveRange
         title="Resting pill width"
         body="How wide the small pill with the clock is on the desktop."
         icon={<Icon><rect x="2.5" y="9" width="19" height="6" rx="3" /><path d="M2.5 5h19" /></Icon>}

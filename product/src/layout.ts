@@ -106,6 +106,12 @@ export interface NotchMetrics {
    * so the hit rect shrinks with it.
    */
   cardScale: number
+  /**
+   * Holm: opened cards' height as a percentage of their designed height, on
+   * top of `cardScale`. The content keeps its designed height inside — centred
+   * in a taller card, scrolling in a shorter one (see `NotchShell`).
+   */
+  cardHeight: number
 }
 
 /** The design export's own geometry — what the notch draws before any preference lands. */
@@ -114,6 +120,7 @@ export const DEFAULT_METRICS: NotchMetrics = {
   pillHeight: size.peek.height,
   panelScale: 100,
   cardScale: 100,
+  cardHeight: 100,
 }
 
 /**
@@ -149,7 +156,25 @@ export function cardSize(
   const design = designSize(state, module, metrics, fit)
   if (state !== 'expanded' && state !== 'announce') return design
   const k = metrics.cardScale / 100
-  return { width: Math.round(design.width * k), height: Math.round(design.height * k) }
+  const tall = state === 'expanded' ? metrics.cardHeight / 100 : 1
+  return {
+    width: Math.round(design.width * k),
+    // Capped so the card never runs past the bottom of the 420px window; a
+    // card that would is scrolled inside instead.
+    height: Math.min(Math.round(design.height * k * tall), CARD_MAX_HEIGHT),
+  }
+}
+
+const CARD_MAX_HEIGHT = 400
+
+/** The card's designed height at 100% — what its content is laid out in. */
+export function designHeight(
+  state: NotchState,
+  module: NotchModule,
+  metrics: NotchMetrics = DEFAULT_METRICS,
+  fit?: NotificationsFit,
+) {
+  return designSize(state, module, metrics, fit).height
 }
 
 /** The card at 100%, before `cardScale`. */

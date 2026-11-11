@@ -593,3 +593,9 @@ button {
     opacity: 0.18;
   }
 }
+
+/* Holm: the scroll a card gets when its height preference is below 100%. */
+.holm-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--dashed) transparent;
+}

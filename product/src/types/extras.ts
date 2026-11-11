@@ -14,6 +14,8 @@ export interface Extras {
   cardScale: number
   /** How long the cursor rests on the notch before it opens, in ms. */
   openDelayMs: number
+  /** Opened cards' height, as a percentage of their designed height. */
+  cardHeight: number
   hideInFullscreen: boolean
   hudVolume: boolean
   hudBrightness: boolean
@@ -41,6 +43,7 @@ export const EXTRAS_DEFAULTS: Extras = {
   lineOverApps: true,
   cardScale: 95,
   openDelayMs: 90,
+  cardHeight: 100,
   hideInFullscreen: true,
   hudVolume: true,
   hudBrightness: true,

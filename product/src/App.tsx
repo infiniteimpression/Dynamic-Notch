@@ -111,8 +111,9 @@ export default function App() {
       pillHeight: shape === 'line' ? 5 : settings.notchHeight,
       panelScale: settings.panelScale,
       cardScale: settings.extras.cardScale,
+      cardHeight: settings.extras.cardHeight,
     }),
-    [settings.notchWidth, settings.notchHeight, settings.panelScale, settings.extras.cardScale, shape],
+    [settings.notchWidth, settings.notchHeight, settings.panelScale, settings.extras.cardScale, settings.extras.cardHeight, shape],
   )
 
   const notificationsEnabled = loaded && settings.notifications

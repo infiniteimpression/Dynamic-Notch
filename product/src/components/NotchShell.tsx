@@ -43,6 +43,7 @@ import type { NotificationFeed } from '../hooks/useWindowsNotifications'
 import {
   CARD_TOP,
   NAV_STRIP_HEIGHT,
+  designHeight,
   cardSize,
   type NotchMetrics,
   type NotificationsFit,
@@ -350,6 +351,7 @@ export default function NotchShell({
   const isExpanded = state === 'expanded'
   const isAnnouncing = state === 'announce'
   const peek = cardSize('peek', activeModule, metrics)
+  const designContent = designHeight('expanded', activeModule, metrics, notificationsFit) - NAV_STRIP_HEIGHT
 
   // The user's speed, applied to the notch's whole motion vocabulary: the card's
   // own spring and the cross-fade between what is inside it. Deliberately not
@@ -500,6 +502,16 @@ export default function NotchShell({
                       style={{ position: 'absolute', inset: 0 }}
                     >
                       {isExpanded ? (
+                        // Holm: the module keeps its designed height whatever
+                        // the card height preference says — centred by the
+                        // auto margins when the card is taller, scrolled when it
+                        // is shorter. Auto margins rather than justify-content,
+                        // which would clip the top of an overflowing card.
+                        <div
+                          className="holm-scroll"
+                          style={{ position: 'absolute', inset: 0, overflowY: 'auto', overflowX: 'hidden', display: 'flex', flexDirection: 'column' }}
+                        >
+                          <div style={{ height: designContent, flex: 'none', margin: 'auto 0', position: 'relative' }}>
                         <ModuleContent
                           module={activeModule}
                           session={session}
@@ -517,6 +529,8 @@ export default function NotchShell({
                           animationSpeed={animationSpeed}
                           extraFeeds={extraFeeds}
                         />
+                          </div>
+                        </div>
                       ) : isAnnouncing ? (
                         <AnnounceContent announcement={announcement} session={session} />
                       ) : (
