@@ -597,6 +597,9 @@ export function formatHotkey(accelerator: string | null): string {
 export function usePlaceSearch(query: string) {
   const [results, setResults] = useState<Place[]>([])
   const [searching, setSearching] = useState(false)
+  // Holm: a failed search used to read "Nothing found" — the same words as a
+  // misspelt town — so a blocked or offline geocoder looked like a bad name.
+  const [error, setError] = useState<string | null>(null)
   const sequence = useRef(0)
 
   useEffect(() => {
@@ -604,6 +607,7 @@ export function usePlaceSearch(query: string) {
     if (trimmed.length < 2) {
       setResults([])
       setSearching(false)
+      setError(null)
       return
     }
 
@@ -613,10 +617,16 @@ export function usePlaceSearch(query: string) {
     const timer = setTimeout(() => {
       void invoke<Place[]>('search_places', { query: trimmed })
         .then((found) => {
-          if (ticket === sequence.current) setResults(found)
+          if (ticket === sequence.current) {
+            setResults(found)
+            setError(null)
+          }
         })
-        .catch(() => {
-          if (ticket === sequence.current) setResults([])
+        .catch((reason) => {
+          if (ticket === sequence.current) {
+            setResults([])
+            setError(typeof reason === 'string' && reason ? reason : "Couldn't reach the place search")
+          }
         })
         .finally(() => {
           if (ticket === sequence.current) setSearching(false)
@@ -626,7 +636,7 @@ export function usePlaceSearch(query: string) {
     return () => clearTimeout(timer)
   }, [query])
 
-  return { results, searching }
+  return { results, searching, error }
 }
 
 /** Where notes are written. Mirrors `NotesLocation` in `src-tauri/src/notes.rs`. */
