@@ -112,11 +112,7 @@ function Crescent() {
     >
       <svg viewBox="0 0 24 24" width={22} height={22} fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
         <path d="M15.5 4.5a7.5 7.5 0 1 0 4 10.5 6 6 0 0 1-4-10.5z" />
-        <motion.path
-          d="M18 4.5l.5 1.3 1.3.5-1.3.5-.5 1.3-.5-1.3-1.3-.5 1.3-.5z"
-          animate={{ opacity: [0.3, 1, 0.3] }}
-          transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
-        />
+        <path d="M18 4.5l.5 1.3 1.3.5-1.3.5-.5 1.3-.5-1.3-1.3-.5 1.3-.5z" className="holm-twinkle" />
       </svg>
     </div>
   )

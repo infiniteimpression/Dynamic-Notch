@@ -90,10 +90,9 @@ function Zs() {
       style={{ position: 'absolute', right: -14, top: -6, width: 14, height: 20, pointerEvents: 'none' }}
     >
       {[0, 1, 2].map((i) => (
-        <motion.span
+        <span
           key={i}
-          animate={{ y: [6, -8], x: [0, 4], opacity: [0, 1, 0] }}
-          transition={{ duration: 2.4, repeat: Infinity, delay: i * 0.8, ease: 'easeOut' }}
+          className="holm-z"
           style={{
             position: 'absolute',
             left: 0,
@@ -101,10 +100,11 @@ function Zs() {
             fontSize: 7 + i,
             fontWeight: 700,
             color: color.text.secondary,
+            animationDelay: `${i * 0.8}s`,
           }}
         >
           z
-        </motion.span>
+        </span>
       ))}
     </motion.span>
   )

@@ -23,6 +23,17 @@ import { rectContains, type Rect } from '../types/notch'
  */
 
 const POLL_MS = 16
+/**
+ * Holm: the poll rate while the cursor is nowhere near the notch. Crest polled
+ * at 16 ms all day — sixty IPC round trips a second for a cursor parked in the
+ * middle of a spreadsheet — which was the largest share of the app's idle CPU.
+ * Far away is 120 ms; the near band below is deep enough that a cursor
+ * travelling up to the notch crosses it before arriving, so the switch back to
+ * 16 ms happens on the way and the notch still answers at full rate.
+ */
+const FAR_POLL_MS = 120
+const NEAR_BELOW = 260
+const NEAR_SIDE = 420
 /** Monitor geometry and window origin change rarely; re-read them on this cadence. */
 const GEOMETRY_REFRESH_MS = 2000
 
@@ -136,40 +147,36 @@ export function useHotzone(getContentRect: (x: number, y: number) => Rect | null
       }
     }
 
-    const tick = async () => {
+    // Returns how long to wait before the next poll.
+    const tick = async (): Promise<number> => {
       const now = Date.now()
       if (!geometry || now - lastGeometryRead > GEOMETRY_REFRESH_MS) {
         const next = await readGeometry()
-        if (cancelled) return
+        if (cancelled) return POLL_MS
         if (next) {
           geometry = next
           lastGeometryRead = now
         }
       }
-      if (!geometry) return
+      if (!geometry) return POLL_MS
 
       try {
         const pos = await cursorPosition()
-        if (cancelled) return
-        // Physical screen pixels → window-local CSS pixels.
+        if (cancelled) return POLL_MS
         const localX = (pos.x - geometry.originX) / geometry.scale
         const localY = (pos.y - geometry.originY) / geometry.scale
         evaluate(localX, localY, window.innerWidth)
+        const near =
+          localY < window.innerHeight + NEAR_BELOW &&
+          localX > -NEAR_SIDE &&
+          localX < window.innerWidth + NEAR_SIDE
+        return near ? POLL_MS : FAR_POLL_MS
       } catch {
-        // Cursor can be unreadable transiently (e.g. during a session lock).
-        // Skip the frame rather than thrashing state.
+        // Cursor read can fail transiently (e.g. secure desktop). Skip a tick.
+        return FAR_POLL_MS
       }
     }
 
-    // The window origin is cached, and the position preference moves the window
-    // out from under that cache: every cursor position would be converted against
-    // the old origin until the next scheduled refresh, i.e. the notch would open
-    // from where it used to be for up to two seconds after the setting changed.
-    //
-    // Invalidated twice because `set_position` is queued onto the window thread
-    // and can still be in flight when Rust broadcasts — the first pass catches the
-    // common case, the second one catches a move that had not landed yet. Both are
-    // a single extra geometry read, and only on a preference change.
     const invalidate = () => {
       lastGeometryRead = 0
     }
@@ -183,10 +190,18 @@ export function useHotzone(getContentRect: (x: number, y: number) => Rect | null
     // Start click-through so the transparent window never blocks the desktop.
     setIgnoreEvents(true)
 
-    const interval = setInterval(tick, POLL_MS)
+    // A chain of timeouts rather than an interval: each poll waits for the last
+    // to finish (an interval fired the next one regardless, so a slow IPC call
+    // stacked polls up), and the gap adapts to where the cursor is.
+    let timer: ReturnType<typeof setTimeout> | null = null
+    const loop = async () => {
+      const wait = await tick()
+      if (!cancelled) timer = setTimeout(loop, wait)
+    }
+    void loop()
     return () => {
       cancelled = true
-      clearInterval(interval)
+      if (timer) clearTimeout(timer)
       if (settled) clearTimeout(settled)
       void pendingUnlisten.then((unlisten) => unlisten())
       window.removeEventListener('native-file-drag', onNativeFileDrag)

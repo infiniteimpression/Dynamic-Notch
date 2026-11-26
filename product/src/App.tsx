@@ -290,7 +290,12 @@ export default function App() {
   // One poll shared by the collapsed pill and the media card. Drops to a slow
   // watch rate while hidden rather than stopping, so a track starting still
   // registers with nothing on screen.
-  const session = useMediaSession(state !== 'hidden')
+  // Holm: only an open card or banner needs the fast poll and the 4×/s
+  // progress re-render. Crest used `state !== 'hidden'`, but Holm's notch always
+  // rests on screen (line or pill), so that was true all day — and while music
+  // played the whole app re-rendered four times a second for a pill that shows
+  // nothing but the equalizer.
+  const session = useMediaSession(state === 'expanded' || state === 'announce')
 
   // Starting music drops the now-playing banner in for a few seconds, so
   // the notch says what is playing without being asked. The state machine still

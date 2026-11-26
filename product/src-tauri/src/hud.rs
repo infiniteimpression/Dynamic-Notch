@@ -451,6 +451,13 @@ mod native {
         let enabled = crate::settings::current(app).extras.hide_in_fullscreen;
         let covered = if enabled { fullscreen_monitor() } else { None };
 
+        // The common case — nothing full screen, nothing of ours hidden — needs
+        // no window queries at all. Each of those is a round trip to the main
+        // thread, and this runs twice a second for the life of the app.
+        if covered.is_none() && hidden_by_us.is_empty() {
+            return;
+        }
+
         for window in crate::display::notch_windows(app) {
             let label = window.label().to_string();
             let on_covered = match (covered, window.current_monitor()) {

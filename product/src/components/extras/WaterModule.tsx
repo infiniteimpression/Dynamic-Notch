@@ -91,11 +91,10 @@ function Glass({ share }: { share: number }) {
       <g clipPath="url(#water-glass)">
         <rect x="0" y="0" width="44" height="56" fill={color.scrubTrack} />
         <motion.g initial={false} animate={{ y: top }} transition={{ type: 'spring', stiffness: 120, damping: 18 }}>
-          <motion.path
+          <path
             d="M-44 4 q11 -4 22 0 t22 0 t22 0 t22 0 t22 0 V60 H-44z"
             fill={color.accent}
-            animate={still ? undefined : { x: [0, 44] }}
-            transition={still ? undefined : { duration: 2.4, ease: 'linear', repeat: Infinity }}
+            className={still ? undefined : 'holm-wave'}
           />
         </motion.g>
       </g>
